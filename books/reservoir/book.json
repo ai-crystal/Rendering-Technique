@@ -1,0 +1,31 @@
+{
+  "name": "reservoir",
+  "title": "基于储蓄池的渲染",
+  "series_title": "专业级渲染技术",
+  "volume": "专题八",
+  "volume_no": "08",
+  "subtitle": "从 RIS 到 ReSTIR",
+  "pdf": "rendering-08-reservoir.pdf",
+  "author": "Dr. Dezeming",
+  "year": "2026",
+  "toc_sections": true,
+  "accent": "#c07a2a",
+  "oneline": "蓄水池采样、时空复用、GRIS 与偏差控制",
+  "cover": {
+    "image": "logo12.png",
+    "kicker": "专业级渲染技术",
+    "title_lines": [
+      "基于储蓄池",
+      "的渲染"
+    ],
+    "footer": "RIS · ReSTIR · 时空重采样 · GRIS · 偏差",
+    "back_quote": "与其采一次，不如记住上一次。",
+    "back_paras": [
+      "光源采样在有很多灯的场景里会失效：随机挑一盏灯，大多数时候挑中的那盏对当前着色点毫无贡献。蓄水池采样换了个思路——多试几个候选，只留下最好的那个，并记住它被选中的概率。",
+      "这本书从蓄水池采样讲到 RIS，再到 ReSTIR 的时空复用、路径复用与 GRIS 理论，重点是那些让结果仍然无偏的细节。"
+    ],
+    "back_image": "logo12.png"
+  },
+  "blurb": "光源采样在有很多灯的场景里会失效：随机挑一盏灯，大多数时候挑中的那盏对当前着色点毫无贡献。蓄水池采样换了个思路——多试几个候选，只留下最好的那个，并记住它被选中的概率。\n这本书从蓄水池采样讲到 RIS，再到 ReSTIR 的时空复用、路径复用与 GRIS 理论，重点是那些让结果仍然无偏的细节。",
+  "pages": 53
+}

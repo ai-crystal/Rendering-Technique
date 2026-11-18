@@ -1,0 +1,28 @@
+{
+  "name": "beginner",
+  "title": "材质渲染的骨架",
+  "series_title": "专业级渲染技术",
+  "volume": "入门篇",
+  "volume_no": "00",
+  "subtitle": "从光线追踪器到可用的材质系统",
+  "pdf": "rendering-00-beginner.pdf",
+  "author": "Dr. Dezeming",
+  "year": "2026",
+  "toc_sections": true,
+  "accent": "#b5651d",
+  "oneline": "微表面、Fresnel、能量补偿、分层与采样",
+  "cover": {
+    "image": "logo1.png",
+    "kicker": "专业级渲染技术",
+    "title_lines": null,
+    "footer": "BSDF · Fresnel · 微表面 · 多重散射 · 采样 · 验证",
+    "back_quote": "表面之下，是一层看不见的结构。",
+    "back_paras": [
+      "一个材质为什么长成那个公式，公式里每一项在物理上对应什么，换一种材料时哪一条假设先碎——这是后面八册反复要问的三个问题。",
+      "入门篇把公共语言搭起来：Fresnel、微表面三段式、丢失的能量、分层界面、采样与验证。读完能自己写出一个能量守恒、能被采样的 BSDF，也知道怎么证明它是对的。"
+    ],
+    "back_image": "logo1.png"
+  },
+  "blurb": "一个材质为什么长成那个公式，公式里每一项在物理上对应什么，换一种材料时哪一条假设先碎——这是后面八册反复要问的三个问题。\n入门篇把公共语言搭起来：Fresnel、微表面三段式、丢失的能量、分层界面、采样与验证。读完能自己写出一个能量守恒、能被采样的 BSDF，也知道怎么证明它是对的。",
+  "pages": 78
+}

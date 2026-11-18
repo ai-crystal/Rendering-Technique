@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <title>专业级渲染技术 · Dr. Dezeming</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0">
+  <meta name="description" content="一套写给渲染实现者的材质专题书：微表面、布料、毛发、次表面散射、光谱、各向异性金属、体素、波动光学与蓄水池重采样。">
+  <link rel="stylesheet" href="books/build/assets/vue.css">
+  <link rel="stylesheet" href="books/build/assets/katex.min.css">
+  <style>
+    :root {
+      --theme-color: #b5651d;
+      --base-font-family: "Source Han Serif SC", "Noto Serif SC", "Songti SC", "SimSun", Georgia, serif;
+      --content-max-width: 50em;
+    }
+    section.cover { background: #0a1018 !important; }
+    section.cover .cover-main {
+      position: static !important; transform: none !important;
+      max-width: 900px; margin: 0 auto !important; padding: 5vh 24px 9vh;
+    }
+    section.cover::before { display: none; }
+    section.cover .cover-main h1, section.cover .cover-main h1 a { color: #fff !important; font-size: 2.5rem !important; }
+    section.cover .cover-main blockquote p { color: #cfd8e4; }
+    section.cover .cover-main > p a { color: #fff; border-color: rgba(255,255,255,.6); }
+    section.cover .cover-main > p a:last-child { background: #d9a45b; border-color: #d9a45b; color: #1b1b1b; }
+    .markdown-section img { max-width: 100%; }
+    .markdown-section table { display: table; width: 100%; }
+  </style>
+</head>
+<body>
+  <div id="app"></div>
+  <script>
+    window.$docsify = {
+      name: '专业级渲染技术',
+      repo: '',
+      loadSidebar: true,
+      subMaxLevel: 2,
+      coverpage: true,
+      onlyCover: false,
+      auto2top: true,
+      search: {
+        maxAge: 86400000,
+        paths: ['/', '/books/'],
+        placeholder: '搜索…',
+        noData: '没有找到结果',
+        depth: 3
+      },
+      pagination: {
+        previousText: '上一篇',
+        nextText: '下一篇',
+        crossChapter: true,
+        crossChapterText: true
+      },
+      copyCode: { buttonText: '复制', errorText: '复制失败', successText: '已复制' },
+      plugins: [
+        function (hook, vm) {
+          hook.doneEach(function () {
+            if (window.renderMathInElement) {
+              renderMathInElement(document.querySelector('.markdown-section'), {
+                delimiters: [
+                  { left: '$$', right: '$$', display: true },
+                  { left: '$', right: '$', display: false }
+                ],
+                throwOnError: false,
+                ignoredTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+              });
+            }
+          });
+        }
+      ]
+    };
+  </script>
+  <script src="books/build/assets/docsify.min.js"></script>
+  <script src="books/build/assets/search.min.js"></script>
+  <script src="books/build/assets/docsify-pagination.min.js"></script>
+  <script src="books/build/assets/docsify-copy-code.min.js"></script>
+  <script src="books/build/assets/katex.min.js"></script>
+  <script src="books/build/assets/auto-render.min.js"></script>
+</body>
+</html>

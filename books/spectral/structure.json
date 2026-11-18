@@ -1,0 +1,28 @@
+{
+  "front": ["front/cover.md", "front/titlepage.md", "front/copyright.md", "front/preface.md"],
+  "body": [
+    {"type": "part", "file": "front/part1.md"},
+    {"type": "chapter", "file": "chapters/ch01.md"},
+    {"type": "chapter", "file": "chapters/ch02.md"},
+    {"type": "chapter", "file": "chapters/ch03.md"},
+    {"type": "chapter", "file": "chapters/ch04.md"},
+    {"type": "part", "file": "front/part2.md"},
+    {"type": "chapter", "file": "chapters/ch05.md"},
+    {"type": "chapter", "file": "chapters/ch06.md"},
+    {"type": "chapter", "file": "chapters/ch07.md"},
+    {"type": "chapter", "file": "chapters/ch08.md"},
+    {"type": "part", "file": "front/part3.md"},
+    {"type": "chapter", "file": "chapters/ch09.md"},
+    {"type": "chapter", "file": "chapters/ch10.md"},
+    {"type": "chapter", "file": "chapters/ch11.md"},
+    {"type": "chapter", "file": "chapters/ch12.md"},
+    {"type": "part", "file": "front/part4.md"},
+    {"type": "chapter", "file": "chapters/ch13.md"},
+    {"type": "chapter", "file": "chapters/ch14.md"},
+    {"type": "appendix", "file": "appendix/app_a.md"},
+    {"type": "appendix", "file": "appendix/app_b.md"},
+    {"type": "appendix", "file": "appendix/app_c.md"},
+    {"type": "chapter", "file": "front/afterword.md"},
+    {"type": "chapter", "file": "front/backcover.md"}
+  ]
+}

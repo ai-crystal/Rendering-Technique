@@ -1,0 +1,30 @@
+{
+  "name": "wave-optics",
+  "title": "波动光学渲染",
+  "series_title": "专业级渲染技术",
+  "volume": "专题七",
+  "volume_no": "07",
+  "subtitle": "从衍射到结构色",
+  "pdf": "rendering-07-wave-optics.pdf",
+  "author": "Dr. Dezeming",
+  "year": "2026",
+  "toc_sections": true,
+  "accent": "#7a5ca8",
+  "oneline": "衍射、薄膜干涉、结构色与偏振",
+  "cover": {
+    "image": "logo6.png",
+    "kicker": "专业级渲染技术",
+    "title_lines": [
+      "波动光学渲染"
+    ],
+    "footer": "衍射 · 薄膜 · 多层膜 · 结构色 · 偏振 · Mueller",
+    "back_quote": "当尺度接近波长，几何光学就开始说谎。",
+    "back_paras": [
+      "肥皂泡的彩色、孔雀羽毛的蓝、CD 背面的彩虹，都不是颜料造成的。它们的颜色来自干涉与衍射——光的相位在起作用，而几何光学里没有相位这个量。",
+      "这本书从标量衍射讲到多层膜传输矩阵，从光栅讲到结构色，再把偏振与 Mueller 矩阵接进 BSDF，最后讨论波动光学怎么和路径追踪结合。"
+    ],
+    "back_image": "logo6.png"
+  },
+  "blurb": "肥皂泡的彩色、孔雀羽毛的蓝、CD 背面的彩虹，都不是颜料造成的。它们的颜色来自干涉与衍射——光的相位在起作用，而几何光学里没有相位这个量。\n这本书从标量衍射讲到多层膜传输矩阵，从光栅讲到结构色，再把偏振与 Mueller 矩阵接进 BSDF，最后讨论波动光学怎么和路径追踪结合。",
+  "pages": 71
+}

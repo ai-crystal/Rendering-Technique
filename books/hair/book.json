@@ -1,0 +1,30 @@
+{
+  "name": "hair",
+  "title": "毛发渲染",
+  "series_title": "专业级渲染技术",
+  "volume": "专题二",
+  "volume_no": "02",
+  "subtitle": "从一根纤维到一头头发",
+  "pdf": "rendering-02-hair.pdf",
+  "author": "Dr. Dezeming",
+  "year": "2026",
+  "toc_sections": true,
+  "accent": "#6b4b8a",
+  "oneline": "Marschner 模型、双散射、远距离 LOD 与采样",
+  "cover": {
+    "image": "logo7.png",
+    "kicker": "专业级渲染技术",
+    "title_lines": [
+      "毛发渲染"
+    ],
+    "footer": "Kajiya–Kay · Marschner · 双散射 · 重要性采样 · LOD",
+    "back_quote": "一根头发的横截面，藏着一整套光学。",
+    "back_paras": [
+      "毛发的高光为什么有两道？为什么逆光时整头头发会亮起来？答案在纤维的同心结构里：角质层、皮层、髓质，各自折射率不同，光线在里面走 R、TT、TRT 三条路。",
+      "这本书从 Kajiya–Kay 讲到 Marschner，再讲生产里真正用的双散射与远距离 LOD，最后把毛发当成一种极细的参与介质重新看一遍。"
+    ],
+    "back_image": "logo7.png"
+  },
+  "blurb": "毛发的高光为什么有两道？为什么逆光时整头头发会亮起来？答案在纤维的同心结构里：角质层、皮层、髓质，各自折射率不同，光线在里面走 R、TT、TRT 三条路。\n这本书从 Kajiya–Kay 讲到 Marschner，再讲生产里真正用的双散射与远距离 LOD，最后把毛发当成一种极细的参与介质重新看一遍。",
+  "pages": 64
+}

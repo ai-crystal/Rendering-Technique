@@ -1,0 +1,10 @@
+# 本地私有资料，不进仓库
+_private/
+paper/
+books/build/_out/
+books/build/__pycache__/
+books/common/__pycache__/
+**/__pycache__/
+*.pyc
+.DS_Store
+Thumbs.db
