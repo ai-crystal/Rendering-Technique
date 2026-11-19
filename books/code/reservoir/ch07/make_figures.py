@@ -2,119 +2,100 @@ import sys, pathlib
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[3] / "common"))
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1]))
 from figstyle import *
-import ris
-
-N = 64
-M = 8
-G = 8
-
-
-def vdc(i, base=2):
-    """van der Corput 序列的第 i 个数。"""
-    out, f = 0.0, 1.0
-    while i > 0:
-        f /= base
-        out += f * (i % base)
-        i //= base
-    return out
-
-
-def sets_for(mode, frame, rng):
-    """返回 (G, G, M) 的候选下标。"""
-    out = np.zeros((G, G, M), dtype=int)
-    for i in range(G):
-        for j in range(G):
-            p = i * G + j
-            if mode == "same":
-                r = np.random.default_rng(frame)
-                out[i, j] = r.integers(0, N, size=M)
-            elif mode == "vdc":
-                k = p * M
-                out[i, j] = [int(vdc(k + s) * N) for s in range(M)]
-            else:
-                r = np.random.default_rng(p * 7919 + frame * 104729 + 17)
-                out[i, j] = r.integers(0, N, size=M)
-    return out
-
-
-def overlap(mode, dist, trials=30):
-    vals = []
-    for t in range(trials):
-        a = sets_for(mode, t, None)
-        A = a[:, :-dist].reshape(-1, M)
-        B = a[:, dist:].reshape(-1, M)
-        inter = [len(set(x) & set(y)) for x, y in zip(A, B)]
-        uni = [len(set(x) | set(y)) for x, y in zip(A, B)]
-        vals.append(np.mean(np.array(inter) / np.array(uni)))
-    return float(np.mean(vals))
+import lab
 
 
 def fig7_1():
-    ds = [1, 2, 3, 4]
-    fig, ax = plt.subplots(figsize=(6.3, 3.3))
-    for mode, lab, col, mk in [
-            ("same", "每帧一条序列，所有像素共用", RED, "o-"),
-            ("hash", "每像素按坐标散列种子", TEAL, "s-")]:
-        ys = [overlap(mode, d) for d in ds]
-        ax.plot(ds, ys, mk, ms=4, color=col, label=lab)
-        print(lab, " ".join(f"{y:.3f}" for y in ys))
-    ax.set_xlabel("像素间距")
-    ax.set_ylabel("候选集的 Jaccard 重叠率")
-    ax.set_ylim(0, 1.05)
-    ax.legend(loc="center right")
-    save(fig, "fig7-1-overlap.png")
+    fig, axes = plt.subplots(1, 2, figsize=(6.9, 3.3))
+    ax = axes[0]
+    for bug, lab_, col in [(False, "正确：同时缩 $\\hat W$ 与 $M$", ACCENT),
+                           (True, "只钳 $M$，不缩 $\\hat W$", BLUE)]:
+        errs = []
+        for s in range(6):
+            r = lab.sim(seed=s * 97, T=24, M0=4, cap=20, radius=1, bug_cap=bug)
+            t = r["truth"]
+            errs.append(np.sqrt(np.mean(((r["est"] - t) / t) ** 2, axis=1)))
+        ax.plot(np.mean(errs, axis=0), color=col, label=lab_)
+    ax.set_yscale("log")
+    ax.set_xlabel("帧")
+    ax.set_ylabel("相对均方根误差")
+    ax.legend(loc="lower right", fontsize=7)
+    ax.set_title("钳制时漏掉缩放", fontsize=9)
 
-
-def clamp_experiment(limit, M=8, frames=40, trials=250, cap=32):
-    b = ris.make_scene(N, 1, 0, "zipf")[0]
-    vis = ris.visibility(N, frames, 0, soft=True, lo=0.7, hi=1.0)
-    mot = ris.motion_modulation(N, frames, 0.1, 0)
-    truth = np.array([float((b * mot[t] * vis[t]).sum()) for t in range(frames)])
-    errs = []
-    for s in range(trials):
-        rng = np.random.default_rng(2000 + s)
-        prev, seq = None, []
-        for t in range(frames):
-            phat = b * mot[t]
-            y, ws = ris.ris_step(phat[None, :], M, rng)
-            cur = ris.Res(y, ws, np.array([M]), np.array([phat[y[0]]]))
-            if prev is not None:
-                phc = np.array([phat[prev.y[0]]])
-                wb = min(float((prev.wsum * phc / prev.ph)[0]), limit)
-                tot = cur.wsum + wb
-                pick = rng.random(1) < wb / tot
-                m_tot = int(cur.m[0] + prev.m[0])
-                scale = min(1.0, cap / m_tot)
-                cur = ris.Res(np.where(pick, prev.y, cur.y), tot * scale,
-                              np.array([min(cap, m_tot)]),
-                              np.where(pick, phc, cur.ph))
-            seq.append(float(ris.shade(b[None, :], (vis[t] * mot[t])[None, :],
-                                       cur, phat[None, :])[0]))
-            prev = cur
-        errs.append(np.array(seq) / truth - 1)
-    e = np.array(errs)
-    return float(e.mean()), float(e.std())
+    ax = axes[1]
+    fracs = [0.1, 0.25, 0.5]
+    for kind, lab_, col, mk in [("weak", "剔除最弱的灯", ACCENT, "o"),
+                                ("random", "随机剔除", BLUE, "s")]:
+        ys = []
+        for f in fracs:
+            bs = []
+            for s in range(16):
+                kw = dict(cull_weak=f) if kind == "weak" else dict(cull_random=f)
+                r = lab.sim(seed=s * 97, T=16, M0=4, cap=20, radius=1, **kw)
+                bs.append(lab.stats(r["est"][8:], r["truth"][8:])["bias"])
+            ys.append(np.mean(bs) * 100)
+            print(kind, f, "bias%", round(ys[-1], 1))
+        ax.plot(np.array(fracs) * 100, ys, mk + "-", ms=4, color=col, label=lab_)
+    ax.axhline(0, color=INK, lw=0.8, ls=":")
+    ax.set_xlabel("被剔除的灯所占比例（%）")
+    ax.set_ylabel("相对偏差（%）")
+    ax.legend(loc="lower left", fontsize=8)
+    ax.set_title("支持条件：零权重的灯", fontsize=9)
+    fig.tight_layout()
+    save(fig, "fig7-1-cap.png")
 
 
 def fig7_2():
-    limits = [128, 256, 512, 1024, 2048, 8192, 1e9]
+    clamps = [0.5, 1.0, 2.0, 3.0, 4.0, 6.0, 8.0, 12.0]
+    bia, rel = [], []
+    for c in clamps:
+        bs, sd = [], []
+        for s in range(16):
+            r = lab.sim(seed=s * 97, T=24, M0=4, cap=20, radius=1, clamp=c)
+            st = lab.stats(r["est"][8:], r["truth"][8:])
+            bs.append(st["bias"])
+            sd.append(st["relstd"])
+        bia.append(np.mean(bs) * 100)
+        rel.append(np.mean(sd))
+        print("clamp", c, "bias%", round(bia[-1], 1), "relstd", round(rel[-1], 3))
     fig, ax = plt.subplots(figsize=(6.3, 3.4))
-    bs, ss = [], []
-    for L in limits:
-        bm, bs_ = clamp_experiment(L)
-        bs.append(bm * 100)
-        ss.append(bs_ * 100)
-        print(f"上限 {L:>9.0f}: 偏差 {bm * 100:+.2f}%  标准差 {bs_ * 100:.1f}%")
-    x = np.arange(len(limits))
-    ax.plot(x, np.abs(bs), "o-", ms=4, color=RED, label="偏差的绝对值")
-    ax.plot(x, ss, "s-", ms=4, color=BLUE, label="标准差")
-    ax.set_xticks(x)
-    ax.set_xticklabels(["128", "256", "512", "1k", "2k", "8k", "不限"])
-    ax.set_xlabel("历史权重和的上限")
-    ax.set_ylabel("百分比（%）")
-    ax.legend(loc="upper right")
+    ax.plot(clamps, bia, "o-", color=RED, label="相对偏差（%）")
+    ax.set_xscale("log")
+    ax.set_xlabel("钳制系数 $c$：借来的平均权重不超过自有平均权重的 $c$ 倍")
+    ax.set_ylabel("相对偏差（%）")
+    ax2 = ax.twinx()
+    ax2.plot(clamps, rel, "s--", color=BLUE, label="相对标准差")
+    ax2.set_ylabel("相对标准差")
+    ax2.grid(False)
+    h1, l1 = ax.get_legend_handles_labels()
+    h2, l2 = ax2.get_legend_handles_labels()
+    ax.legend(h1 + h2, l1 + l2, loc="center right", fontsize=8)
     save(fig, "fig7-2-clamp.png")
+
+
+def fig7_3():
+    """四类错误的偏差量级对比。"""
+    names = ["$M$ 记成非零候选数", "随机剔除 25% 的灯", "空间复用不换算",
+             "钳制系数 2", "时间复用不换算"]
+    vals = [56.3, -27.4, 16.0, -16.3, -9.6]
+    cols = [RED, RED, BLUE, BLUE, BLUE]
+    fig, ax = plt.subplots(figsize=(6.4, 3.3))
+    y = np.arange(len(names))
+    ax.barh(y, vals, color=cols, alpha=0.85, height=0.6)
+    for yy, v in zip(y, vals):
+        ax.text(v + (1.5 if v > 0 else -1.5), yy, f"{v:+.1f}%",
+                va="center", ha="left" if v > 0 else "right", fontsize=8)
+    ax.axvline(0, color=INK, lw=0.9)
+    ax.set_yticks(y)
+    ax.set_yticklabels(names, fontsize=8.5)
+    ax.set_xlabel("相对偏差（%）")
+    ax.set_xlim(-70, 70)
+    ax.invert_yaxis()
+    ax.text(35, 4.35, "红色：记账错误", fontsize=7.5, color=RED, ha="center")
+    ax.text(-35, 4.35, "蓝色：近似与钳制", fontsize=7.5, color=BLUE, ha="center")
+    save(fig, "fig7-3-summary.png")
 
 
 fig7_1()
 fig7_2()
+fig7_3()

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""按清单下载各册参考的论文 PDF 到 paper/<册名>/。
+"""按清单下载各册参考的论文 PDF 到 papers/<册名>/，common 表示放 papers 根目录。
 
 用法：python books/common/fetch_papers.py [--book 册名] [--list]
 清单在 paper/manifest.txt，每行：册名<TAB>文件名<TAB>URL
@@ -12,17 +12,20 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
-PAPER = ROOT / "paper"
+PAPER = ROOT / "papers"
 MANIFEST = PAPER / "manifest.txt"
 
 
 def looks_like_pdf(path):
+    """头部是 %PDF-、体积正常、尾部附近有 %%EOF，就算完整。"""
     try:
+        size = path.stat().st_size
+        if size < 20000:
+            return False
         with open(path, "rb") as f:
-            head = f.read(5)
-            if head != b"%PDF-":
+            if f.read(5) != b"%PDF-":
                 return False
-            f.seek(-2048, 2)
+            f.seek(max(0, size - 8192))
             tail = f.read()
         return b"%%EOF" in tail
     except OSError:
@@ -69,9 +72,9 @@ def main():
     for b, name, url in rows:
         if args.book and b != args.book:
             continue
-        dest = PAPER / b / name
+        dest = PAPER / name if b == "common" else PAPER / b / name
         r = fetch(url, dest)
-        print(f"[{r}] {b}/{name}")
+        print(f"[{r}] {dest.relative_to(ROOT)}")
         ok += r == "ok"
         skip += r == "skip"
         fail += r == "fail"

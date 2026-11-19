@@ -5,104 +5,173 @@ from figstyle import *
 from speclib import *
 
 LAM = grid()
+DL = np.gradient(LAM)
+W = d65_like(LAM)
+YW = float((cie_y(LAM) * W * DL).sum())
+A = (cie_xyz_basis(LAM) * (W * DL)) / YW          # 3 x N，白点 Y = 1
+PRIM = [M_RGB2XYZ_PUBLISHED[:, i] for i in range(3)]
+
+
+def primaries(iters=40000):
+    """Mallett–Yuksel 式求解：三个原色各自是带箱约束的最小二乘解。"""
+    lip = np.linalg.eigvalsh(A @ A.T).max()
+    out = []
+    for b in PRIM:
+        s = np.full(len(LAM), 0.5)
+        for _ in range(iters):
+            s = np.clip(s - (A.T @ (A @ s - b)) / lip, 0.0, 1.0)
+        out.append(s)
+    return np.stack(out)          # 3 x N
+
+
+PRIMS = primaries()
+
+
+def srgb_to_rgb(xyz_rgb):
+    return M_XYZ2RGB_PUBLISHED @ xyz_rgb
+
+
+def mallett(rgb):
+    return np.clip(rgb, 0, 1) @ PRIMS
+
+
+def jh(rgb):
+    c, s, res = jh_fit(LAM, np.clip(rgb, 0, 1), illum=W)
+    return s
+
+
+NAIVE_B = np.stack([gaussian_line(LAM, 610, 55), gaussian_line(LAM, 550, 55),
+                    gaussian_line(LAM, 465, 55)])
+NAIVE_N = (NAIVE_B * (W * DL)).sum(axis=1) / YW
+NAIVE_B = NAIVE_B / NAIVE_N[:, None]
+
+
+def naive(rgb):
+    return np.clip(rgb, 0, 1) @ NAIVE_B
+
+
+def roundtrip(s):
+    xyz = A @ s
+    return M_XYZ2RGB_PUBLISHED @ xyz
+
+
+def dE(s, rgb_target):
+    back = roundtrip(s)
+    lab1 = xyz_to_lab(A @ (np.clip(rgb_target, 0, 1) @ np.linalg.lstsq(A, M_RGB2XYZ_PUBLISHED @ np.clip(rgb_target, 0, 1), rcond=None)[0]))
+    lab2 = xyz_to_lab(A @ s)
+    return float(delta_e76(lab1, lab2))
 
 
 # ------------------------------------------------------------------ 图 12-1
-def fig12_1():
-    """菲涅耳两个分量与偏振度。"""
-    fig, axes = plt.subplots(1, 2, figsize=(7.0, 3.1), gridspec_kw={"wspace": 0.30})
+def fig8_1():
+    fig = plt.figure(figsize=(7.0, 3.7))
+    gs = fig.add_gridspec(1, 2, width_ratios=[1.15, 1.0], wspace=0.30)
 
-    th = np.linspace(0, 89.5, 500)
-    n = float(sellmeier("N-BK7", 550.0))
-    ci, si = np.cos(np.deg2rad(th)), np.sin(np.deg2rad(th))
-    ct = np.sqrt(np.maximum(1 - (si / n) ** 2, 0))
-    rs = ((ci - n * ct) / (ci + n * ct)) ** 2
-    rp = ((n * ci - ct) / (n * ci + ct)) ** 2
-    ax = axes[0]
-    ax.plot(th, rs, color=BLUE, lw=1.7, label="$R_s$（垂直偏振）")
-    ax.plot(th, rp, color=ACCENT, lw=1.7, label="$R_p$（平行偏振）")
-    ax.plot(th, np.abs(rs - rp) / (rs + rp), color=PURPLE, lw=1.3, ls="--",
-            label="偏振度")
-    th_b = np.degrees(np.arctan(n))
-    ax.axvline(th_b, color=GREY, lw=0.9, ls=":")
-    ax.text(th_b + 1.5, 0.72, "布儒斯特角\n%.1f°" % th_b, fontsize=7.4, color="#666")
-    ax.set_xlabel("入射角（度）")
-    ax.set_ylabel("反射率 / 偏振度")
-    ax.set_xlim(0, 89)
-    ax.set_ylim(0, 1.02)
-    ax.legend(loc="upper left", fontsize=7.4)
-    ax.set_title("N-BK7，550 nm", pad=6)
+    ax = fig.add_subplot(gs[0])
+    targets = [((1, 1, 1), "白 (1,1,1)", GREY),
+               ((0.5, 0.5, 0.5), "灰 (0.5,0.5,0.5)", "#5b6472"),
+               ((0.9, 0.85, 0.1), "黄 (0.9,0.85,0.1)", GOLD),
+               ((0.1, 0.2, 0.85), "蓝 (0.1,0.2,0.85)", BLUE)]
+    for rgb, lab, col in targets:
+        ax.plot(LAM, jh(rgb) if False else jh_fit(LAM, np.array(rgb, float), illum=W)[1],
+                color=col, lw=1.6, label=lab)
+    ax.set_xlim(380, 780)
+    ax.set_ylim(0, 1.05)
+    ax.set_xlabel("波长 λ (nm)")
+    ax.set_ylabel("重建的反射率")
+    ax.legend(loc="upper center", bbox_to_anchor=(0.5, -0.20), ncol=2,
+              fontsize=7.4, columnspacing=1.2)
+    ax.set_title("同一模型，四种颜色", pad=6)
 
-    # 自然光经 45 度镜面反射后变成部分偏振光，再用检偏器看亮度
-    ax2 = axes[1]
-    thi = np.deg2rad(45.0)
-    cti = np.cos(thi)
-    sti = np.sin(thi)
-    ctt = np.sqrt(1 - (sti / n) ** 2)
-    Rs = ((cti - n * ctt) / (cti + n * ctt)) ** 2
-    Rp = ((n * cti - ctt) / (n * cti + ctt)) ** 2
-    ang = np.linspace(0, 360, 361)
-    S0 = 0.5 * (Rs + Rp)
-    S1 = 0.5 * (Rs - Rp)
-    I = 0.5 * (S0 + S1 * np.cos(np.deg2rad(2 * ang)))
-    I_norm = I / I[0]
-    ax2.plot(ang, I_norm, color=ACCENT, lw=1.8, label="偏振追踪")
-    ax2.axhline(0.5 * (1 + Rp / Rs), color=GREY, lw=1.4, ls="--", label="标量模型")
-    ax2.annotate("$R_p/R_s$ = %.3f" % (Rp / Rs), xy=(90, Rp / Rs), xytext=(150, 0.30),
-                 fontsize=7.8, color="#3c4654",
-                 arrowprops=dict(arrowstyle="-", lw=0.6, color="#8a93a0"))
-    ax2.set_xlabel("检偏器转角（度）")
-    ax2.set_ylabel("相对亮度（以 0 度为 1）")
-    ax2.set_xlim(0, 360)
-    ax2.set_ylim(0, 1.12)
-    ax2.legend(loc="upper right", fontsize=7.4)
-    ax2.set_title("45 度镜面反射后的检偏曲线", pad=6)
-    save(fig, "fig12-1-polarization.png")
+    ax2 = fig.add_subplot(gs[1])
+    rgb = np.array([0.80, 0.30, 0.20])
+    ax2.plot(LAM, jh_fit(LAM, rgb, illum=W)[1], color=ACCENT, lw=1.8, label="多项式×S 形")
+    ax2.plot(LAM, mallett(rgb), color=BLUE, lw=1.5, label="三原色线性分解")
+    ax2.plot(LAM, naive(rgb), color=TEAL, lw=1.4, ls="--", label="三个高斯")
+    ax2.set_xlim(380, 780)
+    ax2.set_ylim(0, 1.05)
+    ax2.set_xlabel("波长 λ (nm)")
+    ax2.set_ylabel("重建的反射率")
+    ax2.legend(loc="upper center", bbox_to_anchor=(0.5, -0.20), ncol=2,
+                fontsize=7.4, columnspacing=1.2)
+    ax2.set_title("同一个 sRGB (0.80, 0.30, 0.20)", pad=6)
+    ax2.annotate("三高斯超过 1", xy=(660, 1.04), xytext=(690, 0.62), fontsize=7.6,
+                 color=TEAL, arrowprops=dict(arrowstyle="-", lw=0.6, color=TEAL))
+    save(fig, "fig12-1-spectra.png")
 
 
 # ------------------------------------------------------------------ 图 12-2
-def _mueller(n, th_deg):
-    """单界面的 4x4 Mueller 矩阵（反射）。"""
-    thi = np.deg2rad(th_deg)
-    cti, sti = np.cos(thi), np.sin(thi)
-    ctt = np.sqrt(1 - (sti / n) ** 2)
-    rs = (cti - n * ctt) / (cti + n * ctt)
-    rp = (n * cti - ctt) / (n * cti + ctt)
-    Rs, Rp = rs ** 2, rp ** 2
-    delta = 0.0 if rs * rp > 0 else np.pi
-    c, s_ = np.cos(delta), np.sin(delta)
-    M = np.zeros((4, 4))
-    M[0, 0] = M[1, 1] = 0.5 * (Rs + Rp)
-    M[0, 1] = M[1, 0] = 0.5 * (Rs - Rp)
-    M[2, 2] = np.sqrt(Rs * Rp) * c
-    M[2, 3] = np.sqrt(Rs * Rp) * s_
-    M[3, 2] = -np.sqrt(Rs * Rp) * s_
-    M[3, 3] = np.sqrt(Rs * Rp) * c
-    return M
+def fig8_2():
+    rng = np.random.default_rng(2)
+    cols = [ACCENT, BLUE, TEAL]
+    names = ["多项式×S 形", "三原色分解", "三个高斯"]
+    fig, ax = plt.subplots(figsize=(6.2, 3.3))
+    for k, (fn, name, col) in enumerate(zip([jh, mallett, naive], names, cols)):
+        xs, ys = [], []
+        for _ in range(120):
+            rgb = rng.uniform(0, 1, 3)
+            s = fn(rgb)
+            slope = float(np.abs(np.gradient(s, LAM)).max())
+            back = roundtrip(s)
+            err = float(np.max(np.abs(back - rgb)))
+            xs.append(slope)
+            ys.append(max(err, 1e-6))
+        ax.loglog(xs, ys, "o", color=col, ms=3.6, alpha=0.75, label=name)
+    ax.set_xlabel("光谱的最大斜率（1/nm）")
+    ax.set_ylabel("往返之后 sRGB 的最大误差")
+    ax.legend(loc="center right", bbox_to_anchor=(1.0, 0.55))
+    save(fig, "fig12-2-roundtrip.png")
 
 
-def fig12_2():
-    """偏振模式下 BSDF 要返回的东西：4x4 Mueller 矩阵。"""
-    n = float(sellmeier("N-BK7", 550.0))
-    fig, axes = plt.subplots(1, 2, figsize=(7.0, 3.2), gridspec_kw={"wspace": 0.34})
-    for ax, th in zip(axes, [45.0, 65.0]):
-        M = _mueller(n, th)
-        im = ax.imshow(M, cmap="RdBu_r", vmin=-0.12, vmax=0.12)
-        for i in range(4):
-            for j in range(4):
-                ax.text(j, i, "%.3f" % M[i, j], ha="center", va="center", fontsize=7,
-                        color="white" if abs(M[i, j]) > 0.07 else "#222")
-        ax.set_xticks(range(4))
-        ax.set_yticks(range(4))
-        ax.set_xticklabels(["I", "Q", "U", "V"], fontsize=8)
-        ax.set_yticklabels(["I", "Q", "U", "V"], fontsize=8)
-        ax.set_title("入射角 %.0f°" % th, pad=6)
-        ax.grid(False)
-    cb = fig.colorbar(im, ax=axes, pad=0.02, fraction=0.03)
-    cb.set_label("矩阵元素", fontsize=8)
-    cb.ax.tick_params(labelsize=7.5)
-    save(fig, "fig12-2-mueller.png")
+# ------------------------------------------------------------------ 图 12-3
+def fig8_3():
+    """压力测试：宽谱光源下三种重建看不出差别，窄带光源下分道扬镳。"""
+    rgb = np.array([0.85, 0.25, 0.15])
+    recs = [("多项式×S 形", jh_fit(LAM, rgb, illum=W)[1]),
+            ("三原色分解", mallett(rgb)),
+            ("三个高斯", naive(rgb))]
+
+    lights = [("D65（宽谱）", W), ("460 nm 窄带", gaussian_line(LAM, 460, 20))]
+
+    fig = plt.figure(figsize=(7.0, 3.3))
+    gs = fig.add_gridspec(1, 2, width_ratios=[0.85, 1.35], wspace=0.24)
+    ax = fig.add_subplot(gs[0])
+    ax.plot(LAM, gaussian_line(LAM, 460, 20), color=PURPLE, lw=1.6)
+    ax.fill_between(LAM, 0, gaussian_line(LAM, 460, 20), color=PURPLE, alpha=0.15, lw=0)
+    ax.set_xlim(380, 780)
+    ax.set_ylim(0, 1.05)
+    ax.set_xlabel("波长 λ (nm)")
+    ax.set_ylabel("相对功率")
+    ax.set_title("两盏灯", pad=6)
+
+    ax2 = fig.add_subplot(gs[1])
+    ax2.set_xlim(0, 1)
+    ax2.set_ylim(0, 1)
+    ax2.axis("off")
+    for j, (name, _) in enumerate(recs):
+        ax2.text(0.13 + 0.29 * j, 0.97, name, fontsize=7.4, ha="center", va="center")
+
+    def under(light, s):
+        y_l = float((cie_y(LAM) * light * DL).sum())
+        return (cie_xyz_basis(LAM) * (light * DL / y_l)) @ s
+
+    for r, (lname, light) in enumerate(lights):
+        xyzs = [under(light, s) for _, s in recs]
+        rgbs = [M_XYZ2RGB_PUBLISHED @ x for x in xyzs]
+        ymax = max(float(np.max(v)) for v in rgbs)
+        y0 = 0.60 - r * 0.44
+        ax2.text(0.01, y0 + 0.30, lname, fontsize=7.8, va="center", color="#444")
+        for j, (xyz, v) in enumerate(zip(xyzs, rgbs)):
+            c = srgb_encode(np.clip(v / ymax, 0, 1))
+            ax2.add_patch(plt.Rectangle((0.02 + 0.29 * j, y0), 0.22, 0.24,
+                                        color=c, ec="#3a3a3a", lw=0.6))
+            ax2.text(0.13 + 0.29 * j, y0 - 0.03, "Y=%.3f" % float(xyz[1]),
+                     fontsize=7.2, ha="center", va="top", color="#555")
+    save(fig, "fig12-3-pressure.png")
 
 
-fig12_1()
-fig12_2()
+
+
+fig8_1()
+fig8_2()
+fig8_3()

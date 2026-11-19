@@ -4,130 +4,140 @@ sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[3] / "common"))
 from figstyle import *
 from speclib import *
 
-LAM = grid()
+H_EV_THZ = H_PLANCK * 1e12 / Q_ELECTRON      # eV per THz = 4.135667696e-3
 
 
 # ------------------------------------------------------------------ 图 2-1
 def fig2_1():
-    """几种常见光源的光谱功率分布。"""
-    bb2800 = blackbody(LAM, 2800.0)
-    bb6500 = blackbody(LAM, 6504.0)
-    led = led_white(LAM, 452, 18, 560, 95, 1.0)
-    # 荧光灯：汞的 436 / 546 / 577 nm 三条线加一层荧光粉连续谱
-    fluor = (gaussian_line(LAM, 436, 4) + 1.6 * gaussian_line(LAM, 546, 5)
-             + 0.55 * gaussian_line(LAM, 577, 6) + 0.22 * gaussian_line(LAM, 610, 70))
-    laser = gaussian_line(LAM, 532, 1.2)
+    """光电效应：最大动能只由频率决定，与光强无关。"""
+    W_NA = 2.28       # 钠的逸出功，eV
+    nu = np.linspace(300, 1600, 400)          # THz
+    K = H_EV_THZ * nu - W_NA
 
-    curves = [(bb2800, "白炽灯 2800 K", RED),
-              (bb6500, "日光 6500 K", GOLD),
-              (led, "白光 LED", BLUE),
-              (fluor, "荧光灯", TEAL),
-              (laser, "532 nm 激光", PURPLE)]
-    fig, ax = plt.subplots(figsize=(6.6, 3.5))
-    for spd, lab, col in curves:
-        ax.plot(LAM, spd / spd.max(), color=col, lw=1.5, label=lab)
-    ax.set_xlim(380, 780)
-    ax.set_ylim(0, 1.08)
-    ax.set_xlabel("波长 λ (nm)")
-    ax.set_ylabel("相对功率（各自按峰值归一）")
-    ax.legend(loc="upper center", bbox_to_anchor=(0.5, -0.20), ncol=3,
-              columnspacing=1.4, handlelength=1.8)
-    save(fig, "fig2-1-spd.png")
+    fig, axes = plt.subplots(1, 2, figsize=(7.2, 3.0))
+
+    ax = axes[0]
+    m = K > 0
+    ax.plot(nu[m], K[m], color=INK, lw=1.8, label="量子图像（两档光强同一条线）")
+    ax.axhline(1.6, color=RED, lw=1.2, ls="--", label="经典波动，强光")
+    ax.axhline(0.55, color=RED, lw=1.2, ls=":", label="经典波动，弱光")
+    nu0 = W_NA / H_EV_THZ
+    ax.axvline(nu0, color=GREY, lw=0.8, ls="-.")
+    ax.annotate("截止频率 %.0f THz（%.0f nm）" % (nu0, C_LIGHT / (nu0 * 1e12) * 1e9),
+                xy=(nu0, 0.0), xytext=(640, -0.33), fontsize=8, color="#3c4654",
+                arrowprops=dict(arrowstyle="-", lw=0.6, color=GREY))
+    ax.set_xlim(300, 1600)
+    ax.set_ylim(-0.55, 4.2)
+    ax.set_xlabel("频率 ν (THz)")
+    ax.set_ylabel("最大动能 $K_{max}$ (eV)")
+    ax.set_title("钠：能量随频率线性上升", pad=6)
+    ax.legend(loc="upper left", bbox_to_anchor=(0.01, 0.99))
+
+    ax = axes[1]
+    for W, c, lab in ((2.28, ACCENT, "钠 2.28 eV"), (4.30, BLUE, "锌 4.30 eV")):
+        V = (H_EV_THZ * nu - W)
+        mm = V > 0
+        ax.plot(nu[mm], V[mm], color=c, lw=1.7, label=lab)
+        ax.plot([W / H_EV_THZ], [0], "o", ms=3.4, color=c)
+    ax.set_xlim(300, 1700)
+    ax.set_ylim(0, 3.0)
+    ax.set_xlabel("频率 ν (THz)")
+    ax.set_ylabel("截止电压 $V_s$ (V)")
+    ax.set_title("两种金属，斜率相同", pad=6)
+    ax.legend(loc="upper left", bbox_to_anchor=(0.01, 0.99))
+    ax.text(330, 1.78, "斜率 = h/e\n= 4.136e-15 V·s", fontsize=8, color="#3c4654")
+    fig.tight_layout()
+    save(fig, "fig2-1-photoelectric.png")
 
 
 # ------------------------------------------------------------------ 图 2-2
 def fig2_2():
-    """辐亮度的几何：投影面积与立体角。"""
-    fig, ax = plt.subplots(figsize=(4.8, 3.1))
-    ox = 0.40
-    ax.plot([-0.05, 1.00], [0, 0], color="#3c4654", lw=1.6)
-    ax.fill_between([ox - 0.07, ox + 0.07], [-0.013, -0.013], [0.013, 0.013], color=ACCENT)
-    ax.annotate("", xy=(ox - 0.07, -0.070), xytext=(ox + 0.07, -0.070),
-                arrowprops=dict(arrowstyle="<|-|>", lw=0.8, color=ACCENT))
-    ax.text(ox, -0.125, r"$dA$", color=ACCENT, ha="center", fontsize=9)
+    """三过程能级图与 A/B 系数随波长的变化。"""
+    fig, axes = plt.subplots(1, 2, figsize=(7.2, 3.0),
+                             gridspec_kw={"width_ratios": [1.0, 1.05]})
 
-    ax.annotate("", xy=(ox, 0.55), xytext=(ox, 0.0),
-                arrowprops=dict(arrowstyle="-|>", lw=1.0, color="#5b6472"))
-    ax.text(ox - 0.045, 0.53, r"$n$", fontsize=9, color="#3c4654")
-
-    th = np.deg2rad(45)
-    L = 0.70
-    tip = np.array([ox + L * np.sin(th), L * np.cos(th)])
-
-    half = np.deg2rad(4.5)
-    r0 = 0.32
-    a1, a2 = th - half, th + half
-    wedge = np.array([[ox + r0 * np.sin(a1), r0 * np.cos(a1)],
-                      [ox + r0 * np.sin(a2), r0 * np.cos(a2)],
-                      [ox + L * np.sin(a2), L * np.cos(a2)],
-                      [ox + L * np.sin(a1), L * np.cos(a1)]])
-    ax.add_patch(plt.Polygon(wedge, closed=True, facecolor=BLUE, alpha=0.13, lw=0))
-    for a in (a1, a2):
-        ax.plot([ox + r0 * np.sin(a), ox + L * np.sin(a)],
-                [r0 * np.cos(a), L * np.cos(a)], color=BLUE, lw=0.7, ls=":")
-    ax.annotate("", xy=tip, xytext=(ox, 0.0),
-                arrowprops=dict(arrowstyle="-|>", lw=1.2, color=BLUE))
-    ax.text(tip[0] + 0.025, tip[1] + 0.045, r"$\omega_i$", fontsize=9, color=BLUE)
-    ax.text(ox + 0.395, 0.30, r"$d\omega_i$", fontsize=9, color=BLUE, ha="left")
-
-    arc2 = np.linspace(0, th, 40)
-    ax.plot(ox + 0.16 * np.sin(arc2), 0.16 * np.cos(arc2), color="#3c4654", lw=0.8)
-    ax.text(ox + 0.028, 0.172, r"$\theta_i$", fontsize=9, color="#3c4654")
-
-    # 投影长度 dA cos θ，沿垂直于 ω 的方向
-    p = np.array([np.cos(th), -np.sin(th)])
-    c = np.array([ox, 0.0]) + 0.215 * np.array([np.sin(th), np.cos(th)])
-    ax.annotate("", xy=c + 0.070 * p, xytext=c - 0.070 * p,
-                arrowprops=dict(arrowstyle="<|-|>", lw=0.9, color=GREY))
-    ax.annotate(r"$dA\cos\theta_i$", xy=tuple(c - 0.02 * p), xytext=(0.012, 0.245),
-                fontsize=8.5, color="#5b6472",
-                arrowprops=dict(arrowstyle="-", lw=0.6, color=GREY))
-    ax.set_xlim(-0.06, 1.00)
-    ax.set_ylim(-0.16, 0.86)
-    ax.set_aspect("equal")
+    ax = axes[0]
+    ax.set_xlim(0, 1)
+    ax.set_ylim(-0.25, 1.35)
     ax.axis("off")
-    save(fig, "fig2-2-radiance.png")
+    ax.plot([0.05, 0.95], [0, 0], color=INK, lw=1.8)
+    ax.plot([0.05, 0.95], [1, 1], color=INK, lw=1.8)
+    ax.text(0.96, -0.02, "g", fontsize=9, va="top", ha="left")
+    ax.text(0.96, 1.02, "e", fontsize=9, va="bottom", ha="left")
+    ax.text(0.03, 0.5, "2.25 eV", fontsize=8, rotation=90, va="center", ha="right",
+            color="#3c4654")
+
+    ax.annotate("", xy=(0.20, 0.96), xytext=(0.20, 0.06),
+                arrowprops=dict(arrowstyle="-|>", lw=1.5, color=BLUE))
+    ax.text(0.235, 0.52, "受激吸收\n$B_{12}\\rho(\\nu)$", fontsize=8, color=BLUE)
+
+    zz_t = np.linspace(0, 1, 200)
+    xz = 0.50 + 0.014 * np.sin(zz_t * 18 * np.pi)
+    ax.plot(xz, 1 - zz_t * 0.92, color=ACCENT, lw=1.3)
+    ax.annotate("", xy=(0.50, 0.03), xytext=(0.50, 0.10),
+                arrowprops=dict(arrowstyle="-|>", lw=1.3, color=ACCENT))
+    ax.text(0.53, 0.52, "自发辐射\n$A_{21}$", fontsize=8, color=ACCENT)
+
+    for dx in (-0.012, 0.012):
+        ax.annotate("", xy=(0.78 + dx, 0.04), xytext=(0.78 + dx, 0.96),
+                    arrowprops=dict(arrowstyle="-|>", lw=1.2, color=TEAL))
+    ax.text(0.81, 0.52, "受激辐射\n$B_{21}\\rho(\\nu)$", fontsize=8, color=TEAL)
+    ax.set_title("三个过程", pad=6)
+
+    ax = axes[1]
+    lam = np.linspace(380, 780, 300)
+    r = einstein_ab_ratio(lam)
+    ax.semilogy(lam, r, color=PURPLE, lw=1.8)
+    for l0, dx, dy in ((400, 8, 0.46), (550, 6, 0.46), (700, -10, 0.62)):
+        v = float(einstein_ab_ratio(l0))
+        ax.plot([l0], [v], "o", ms=3.4, color=PURPLE)
+        ax.annotate("%.2e" % v, xy=(l0, v), xytext=(l0 + dx, v * dy), fontsize=7.6,
+                    color=PURPLE, ha="left")
+    ax.set_xlim(380, 780)
+    ax.set_ylim(2.2e-14, 1.2e-12)
+    ax.set_xlabel("波长 λ (nm)")
+    ax.set_ylabel("$A_{21}/B_{21}$  (J·s/m³)")
+    ax.set_title("自发辐射相对受激辐射的强度，∝ ν³", pad=6)
+    ax.text(470, 5.6e-13, "蓝端比红端强 5.4 倍", fontsize=8, color="#3c4654")
+    fig.tight_layout()
+    save(fig, "fig2-3-ab-coefficients.png")
 
 
 # ------------------------------------------------------------------ 图 2-3
 def fig2_3():
-    """两块面元之间的几何，以及辐照度按 1/r² 衰减而辐亮度不变。"""
-    fig = plt.figure(figsize=(7.0, 3.0))
-    gs = fig.add_gridspec(1, 2, width_ratios=[1.0, 1.15], wspace=0.34)
+    """单个光子的能量与每瓦的光子数。"""
+    lam = np.linspace(380, 780, 300)
+    fig, axes = plt.subplots(1, 2, figsize=(7.2, 2.9))
 
-    ax = fig.add_subplot(gs[0])
-    ax.plot([0.08, 0.42], [0, 0], color="#3c4654", lw=1.5)
-    ax.plot([0.62, 0.96], [0.72, 0.72], color="#3c4654", lw=1.5)
-    ax.plot([0.25, 0.79], [0, 0.72], color="#8a93a0", lw=0.8, ls="--")
-    ax.annotate("", xy=(0.25, 0.26), xytext=(0.25, 0.0),
-                arrowprops=dict(arrowstyle="-|>", lw=0.9, color="#3c4654"))
-    ax.annotate("", xy=(0.79, 0.46), xytext=(0.79, 0.72),
-                arrowprops=dict(arrowstyle="-|>", lw=0.9, color="#3c4654"))
-    ax.annotate("", xy=(0.79, 0.72), xytext=(0.25, 0.0),
-                arrowprops=dict(arrowstyle="-|>", lw=1.2, color=BLUE))
-    ax.text(0.44, 0.47, r"$r$", color=BLUE, fontsize=9, rotation=41)
-    ax.text(0.25, -0.11, r"$dA_1$", ha="center", fontsize=9)
-    ax.text(0.79, 0.82, r"$dA_2$", ha="center", fontsize=9)
-    ax.text(0.285, 0.10, r"$\theta_1$", fontsize=9, color="#3c4654")
-    ax.text(0.745, 0.56, r"$\theta_2$", fontsize=9, color="#3c4654")
-    ax.set_xlim(0, 1.02)
-    ax.set_ylim(-0.18, 0.95)
-    ax.set_aspect("equal")
-    ax.axis("off")
+    ax = axes[0]
+    ax.plot(lam, photon_energy_ev(lam), color=TEAL, lw=1.8)
+    for l0 in (400, 550, 700):
+        e = float(photon_energy_ev(l0))
+        ax.plot([l0], [e], "o", ms=3.4, color=TEAL)
+        ax.annotate("%.2f eV" % e, xy=(l0, e), xytext=(l0 + (26 if l0 == 400 else 8), e + 0.16),
+                    fontsize=8, color=TEAL)
+    ax.set_xlim(380, 780)
+    ax.set_ylim(1.4, 3.5)
+    ax.set_xlabel("波长 λ (nm)")
+    ax.set_ylabel("光子能量 $hc/\\lambda$ (eV)")
+    ax.set_title("蓝光的光子更重", pad=6)
 
-    ax2 = fig.add_subplot(gs[1])
-    # 半径 R=1 的圆盘光源，正对轴线上距离 d 处的辐照度 E = pi L R^2 / (R^2 + d^2)
-    d = np.logspace(-1.2, 0.8, 400)
-    E = np.pi / (1.0 + d ** 2)
-    ax2.loglog(d, E, color=ACCENT, lw=1.9, label="辐照度 $E$")
-    ax2.loglog(d, np.full_like(d, 1.0), color=GREY, lw=1.4, ls="--", label="辐亮度 $L$")
-    ax2.loglog(d, np.pi / d ** 2, color=BLUE, lw=1.0, ls=":", label=r"$\pi R^2 L/d^2$")
-    ax2.set_xlabel("距离 d（单位：圆盘半径 R）")
-    ax2.set_ylabel("相对值")
-    ax2.set_ylim(0.02, 12)
-    ax2.set_xlim(0.06, 6)
-    ax2.legend(loc="lower left", ncol=1)
-    save(fig, "fig2-3-irradiance.png")
+    ax = axes[1]
+    n = photons_per_watt(lam) / 1e18
+    ax.plot(lam, n, color=ACCENT, lw=1.8)
+    ax.axhline(n.mean(), color=GREY, lw=0.9, ls=":")
+    for l0 in (400, 550, 700):
+        v = float(photons_per_watt(l0)) / 1e18
+        ax.plot([l0], [v], "o", ms=3.4, color=ACCENT)
+        ax.annotate("%.2f" % v, xy=(l0, v), xytext=(l0, v + 0.13), fontsize=8,
+                    ha="center", color=ACCENT)
+    ax.set_xlim(380, 780)
+    ax.set_ylim(1.7, 3.9)
+    ax.set_xlabel("波长 λ (nm)")
+    ax.set_ylabel("光子数每秒每瓦（10¹⁸）")
+    ax.set_title("同样的 1 W，光子数只差 75%", pad=6)
+    fig.tight_layout()
+    save(fig, "fig2-2-photon-energy.png")
 
 
 fig2_1()

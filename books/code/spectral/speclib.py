@@ -357,6 +357,85 @@ def mat2str(m, fmt="%.4f"):
     return "\n".join("  ".join(fmt % v for v in row) for row in np.asarray(m))
 
 
+# ---------------------------------------------------------------- 量子光学
+# 第一篇（第 1 到第 4 章）用到的常量与函数。单位取 SI，波长入口一律用 nm。
+
+H_PLANCK = 6.62607015e-34      # J·s，2019 年 SI 定义值
+K_BOLTZ = 1.380649e-23         # J/K
+C_LIGHT = 2.99792458e8         # m/s
+Q_ELECTRON = 1.602176634e-19   # C
+M_ELECTRON = 9.1093837015e-31  # kg
+
+
+def planck_radiance(lam_nm, T):
+    """黑体谱辐亮度 B_λ(T)，单位 W/(m²·sr·nm)。
+
+    B_λ = 2hc²/λ⁵ · 1/(exp(hc/(λk_BT)) - 1)，波长换成 nm 时除以 1e9。
+    这是普朗克 1901 年给出的谱分布，对波长（而不是频率）取密度。
+    """
+    lam = np.asarray(lam_nm, dtype=float) * 1e-9
+    x = H_PLANCK * C_LIGHT / (lam * K_BOLTZ * np.asarray(T, dtype=float))
+    B = 2.0 * H_PLANCK * C_LIGHT ** 2 / lam ** 5 / np.expm1(x)
+    return B * 1e-9          # W/(m³·sr) -> W/(m²·sr·nm)
+
+
+def rayleigh_jeans_radiance(lam_nm, T):
+    """瑞利–金斯极限 B_λ = 2ck_BT/λ⁴，同样单位。短波端发散。"""
+    lam = np.asarray(lam_nm, dtype=float) * 1e-9
+    return 2.0 * C_LIGHT * K_BOLTZ * np.asarray(T, dtype=float) / lam ** 4 * 1e-9
+
+
+def wien_radiance(lam_nm, T):
+    """维恩 1896 年的分布 B_λ ∝ λ⁻⁵ exp(-c₂/(λT))，长波端偏低。"""
+    lam = np.asarray(lam_nm, dtype=float) * 1e-9
+    c2 = H_PLANCK * C_LIGHT / K_BOLTZ
+    B = 2.0 * H_PLANCK * C_LIGHT ** 2 / lam ** 5 * np.exp(-c2 / (lam * np.asarray(T, dtype=float)))
+    return B * 1e-9
+
+
+def wien_peak_nm(T):
+    """维恩位移定律 λ_max = b/T，b = 2.897771955e-3 m·K。"""
+    return 2.897771955e-3 / np.asarray(T, dtype=float) * 1e9
+
+
+def stefan_boltzmann(T):
+    """黑体总辐出度 M = σT⁴，单位 W/m²。"""
+    sigma = 5.670374419e-8
+    return sigma * np.asarray(T, dtype=float) ** 4
+
+
+def photon_energy_j(lam_nm):
+    """单个光子的能量 hc/λ，单位 J。"""
+    return H_PLANCK * C_LIGHT / (np.asarray(lam_nm, dtype=float) * 1e-9)
+
+
+def photon_energy_ev(lam_nm):
+    return photon_energy_j(lam_nm) / Q_ELECTRON
+
+
+def photons_per_watt(lam_nm):
+    """1 W 的单色光每秒有多少个光子：λ/(hc)。"""
+    return 1.0 / photon_energy_j(lam_nm)
+
+
+def einstein_ab_ratio(lam_nm):
+    """A21/B21 = 8πhν³/c³，单位 J·s/m³（能量密度按 Hz 计）。"""
+    nu = C_LIGHT / (np.asarray(lam_nm, dtype=float) * 1e-9)
+    return 8.0 * np.pi * H_PLANCK * nu ** 3 / C_LIGHT ** 3
+
+
+def bose_einstein(nu, T, mu=0.0):
+    """玻色–爱因斯坦占据数 1/(exp((hν-μ)/k_BT) - 1)。"""
+    x = (H_PLANCK * np.asarray(nu, dtype=float) - mu) / (K_BOLTZ * np.asarray(T, dtype=float))
+    return 1.0 / np.expm1(x)
+
+
+def thz(nm):
+    """波长（nm）转频率（THz）。"""
+    return C_LIGHT / (np.asarray(nm, dtype=float) * 1e-9) / 1e12
+
+
+
 if __name__ == "__main__":
     print("RGB->XYZ 推导值")
     print(M_RGB2XYZ)

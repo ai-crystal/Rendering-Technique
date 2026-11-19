@@ -4,109 +4,118 @@ sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[3] / "common"))
 from figstyle import *
 from speclib import *
 
-LAM = grid()
-LAM1 = grid(380, 780, 1.0)
-
 
 # ------------------------------------------------------------------ 图 3-1
 def fig3_1():
-    """CIE 1931 标准观察者的配色函数。"""
+    """三种光的二阶相干度。"""
+    tau = np.linspace(-4, 4, 800)
+    thermal = 1.0 + np.exp(-2.0 * np.abs(tau))
+    coherent = np.ones_like(tau)
+    single = 1.0 - np.exp(-6.0 * np.abs(tau))
+
     fig, ax = plt.subplots(figsize=(6.4, 3.2))
-    ax.plot(LAM1, cie_x(LAM1), color=RED, lw=1.7, label=r"$\bar{x}(\lambda)$")
-    ax.plot(LAM1, cie_y(LAM1), color=GREEN, lw=1.7, label=r"$\bar{y}(\lambda)$")
-    ax.plot(LAM1, cie_z(LAM1), color=BLUE, lw=1.7, label=r"$\bar{z}(\lambda)$")
-    ax.axvline(555, color=GREY, lw=0.8, ls=":")
-    ax.annotate("555 nm\n$\\bar{y}$ 的峰值", xy=(556, 1.02), xytext=(492, 1.46),
-                fontsize=8, color="#3c4654",
-                arrowprops=dict(arrowstyle="-", lw=0.6, color=GREY))
-    ax.set_xlim(380, 780)
-    ax.set_ylim(0, 1.85)
-    ax.set_xlabel("波长 λ (nm)")
-    ax.set_ylabel("响应")
-    ax.legend(loc="upper right", ncol=1)
-    save(fig, "fig3-1-cmf.png")
+    ax.plot(tau, thermal, color=ACCENT, lw=1.8, label="热光（混沌光）  1+|g¹|²")
+    ax.plot(tau, coherent, color=BLUE, lw=1.8, label="相干光（激光）  1")
+    ax.plot(tau, single, color=TEAL, lw=1.5, ls="--", label="单光子源  反聚束")
+    ax.axhline(1.0, color=GREY, lw=0.7, ls=":")
+    ax.set_xlim(-4, 4)
+    ax.set_ylim(0, 2.25)
+    ax.set_xlabel("延迟 τ / τc")
+    ax.set_ylabel("$g^{(2)}(\\tau)$")
+    ax.set_title("二阶相干度把三种光分开", pad=6)
+    ax.legend(loc="lower left", bbox_to_anchor=(0.015, 0.02))
+    ax.annotate("聚束：g²(0)=2", xy=(0, 2.0), xytext=(0.55, 1.55), fontsize=8,
+                color=ACCENT, arrowprops=dict(arrowstyle="-", lw=0.6, color=ACCENT))
+    ax.annotate("g²(0)=0", xy=(0, 0.0), xytext=(0.45, 0.22), fontsize=8,
+                color=TEAL, arrowprops=dict(arrowstyle="-", lw=0.6, color=TEAL))
+    fig.tight_layout()
+    save(fig, "fig3-1-g2.png")
 
 
 # ------------------------------------------------------------------ 图 3-2
 def fig3_2():
-    """xy 色度图、光谱轨迹与三个色域三角形。"""
-    Lx = grid(400, 700, 1.0)
-    x, y = xyz_to_xy(cie_xyz_basis(Lx))
-    fig, ax = plt.subplots(figsize=(5.4, 4.3))
-    # 光谱轨迹：按波长上色
-    for i in range(len(Lx) - 1):
-        c = wl_to_srgb(Lx[i], gamma=False)[0]
-        c = 0.25 + 0.75 * np.array(c) / max(c.max(), 1e-6)
-        ax.plot(x[i:i + 2], y[i:i + 2], color=np.clip(c, 0, 1), lw=2.4)
-    # 紫线
-    ax.plot([x[0], x[-1]], [y[0], y[-1]], color="#9a5b8f", lw=1.6, ls="--")
+    """相干长度与谱宽的关系。"""
+    lam0 = 550.0
+    dl = np.logspace(-6, 3, 400)                    # nm
+    lc = (lam0 * 1e-9) ** 2 / (dl * 1e-9)           # m
 
-    gamuts = [("sRGB / BT.709", [(0.64, 0.33), (0.30, 0.60), (0.15, 0.06)], BLUE),
-              ("Display P3", [(0.680, 0.320), (0.265, 0.690), (0.150, 0.060)], TEAL),
-              ("Rec.2020", [(0.708, 0.292), (0.170, 0.797), (0.131, 0.046)], ACCENT)]
-    for name, tri, col in gamuts:
-        pts = np.array(tri + [tri[0]])
-        ax.plot(pts[:, 0], pts[:, 1], color=col, lw=1.2, label=name)
-    ax.plot(0.3127, 0.3290, "o", color="#333", ms=4)
-    ax.annotate("D65", xy=(0.3127, 0.3290), xytext=(0.335, 0.375), fontsize=8,
-                arrowprops=dict(arrowstyle="-", lw=0.6, color="#666"))
-    ax.text(0.16, 0.83, "520", fontsize=7.5, color="#555")
-    ax.text(0.635, 0.345, "650", fontsize=7.5, color="#555")
-    ax.text(0.145, 0.045, "460", fontsize=7.5, color="#555")
-    ax.set_xlim(0, 0.78)
-    ax.set_ylim(0, 0.88)
-    ax.set_xlabel("色度坐标 x")
-    ax.set_ylabel("色度坐标 y")
-    ax.legend(loc="upper right", fontsize=7.8)
-    save(fig, "fig3-2-chromaticity.png")
+    fig, ax = plt.subplots(figsize=(6.6, 3.4))
+    ax.loglog(dl, lc, color=INK, lw=1.8)
+    marks = [(100.0, "白光 LED", 2.0, 5.0e-6),
+             (0.6, "钠灯 D 双线", 3.0e-2, 4.0e-4),
+             (1e-4, "单频激光", 6e-6, 2.5)]
+    for d0, lab, tx, ty in marks:
+        v = (lam0 * 1e-9) ** 2 / (d0 * 1e-9)
+        ax.plot([d0], [v], "o", ms=4, color=ACCENT)
+        ax.annotate(lab, xy=(d0, v), xytext=(tx, ty), fontsize=8, color="#3c4654",
+                    arrowprops=dict(arrowstyle="-", lw=0.5, color=GREY))
+    ax.axhspan(0.1e-6, 2e-6, color=GREEN, alpha=0.12, lw=0)
+    ax.text(2e-6, 3.6e-7, "薄膜厚度", fontsize=7.5, color=GREEN)
+    ax.set_xlim(1e-6, 1e3)
+    ax.set_ylim(1e-7, 1e4)
+    ax.set_xlabel("谱宽 Δλ（FWHM, nm）")
+    ax.set_ylabel("相干长度 $l_c=\\lambda^2/\\Delta\\lambda$ (m)")
+
+    top = ax.secondary_xaxis("top", functions=(lambda d: C_LIGHT * d * 1e-9 / (lam0 * 1e-9) ** 2 / 1e12,
+                                               lambda f: f * 1e12 * (lam0 * 1e-9) ** 2 / (C_LIGHT * 1e-9)))
+    top.set_xlabel("对应的谱宽 Δν (THz)", fontsize=8.5)
+    ax.set_title("谱宽越窄，相干越长", pad=6)
+    fig.tight_layout()
+    save(fig, "fig3-2-coherence-length.png")
 
 
 # ------------------------------------------------------------------ 图 3-3
 def fig3_3():
-    """单色光在 sRGB 里的分量：负值意味着色域外。"""
-    lams = np.arange(430, 681, 25)
-    rgb = []
-    for l in lams:
-        c = M_XYZ2RGB_PUBLISHED @ np.array([cie_x(l), cie_y(l), cie_z(l)])
-        rgb.append(c / c.max())
-    rgb = np.array(rgb)
+    """薄膜干涉的可见度随膜厚衰减。"""
+    lam0, n_film = 550.0, 1.5
+    lam = np.linspace(300, 900, 4000)
+    d = np.linspace(0, 10000, 500)                  # nm
 
-    fig = plt.figure(figsize=(7.0, 3.2))
-    gs = fig.add_gridspec(1, 2, width_ratios=[1.5, 1.0], wspace=0.30)
-    ax = fig.add_subplot(gs[0])
-    h = 0.26
-    for j, (col, lab) in enumerate([(RED, "R"), (GREEN, "G"), (BLUE, "B")]):
-        ax.barh(np.arange(len(lams)) + (j - 1) * h, rgb[:, j], height=h * 0.92,
-                color=col, alpha=0.85, label=lab)
-    ax.axvline(0, color="#3c4654", lw=0.9)
-    ax.set_yticks(np.arange(len(lams)))
-    ax.set_yticklabels(["%d" % l for l in lams], fontsize=7.5)
-    ax.set_xlabel("线性 sRGB 分量（按最大分量归一）")
-    ax.set_ylabel("波长 (nm)")
-    ax.set_xlim(-1.15, 1.15)
-    leg = ax.legend(loc="lower left", ncol=3, columnspacing=0.9, frameon=True,
-                    facecolor="white", edgecolor="none", framealpha=0.92)
-    leg.set_zorder(10)
-    ax.set_title("负分量出现在色域之外", pad=6)
+    fig, ax = plt.subplots(figsize=(6.6, 3.3))
+    for dl, c, lab in ((100, ACCENT, "Δλ = 100 nm"), (20, BLUE, "Δλ = 20 nm"),
+                       (2, TEAL, "Δλ = 2 nm")):
+        S = gaussian_line(lam, lam0, dl)
+        phase = 4.0 * np.pi * n_film * d[None, :] / lam[:, None]
+        z = np.trapezoid(S[:, None] * np.exp(1j * phase), lam, axis=0)
+        ax.plot(d / 1000.0, np.abs(z) / np.trapezoid(S, lam), color=c, lw=1.7, label=lab)
+    ax.axvspan(0.1, 2.0, color=GREEN, alpha=0.10, lw=0)
+    ax.text(1.55, 0.25, "薄膜", fontsize=8, color=GREEN)
+    ax.set_xlim(0, 10)
+    ax.set_ylim(0, 1.32)
+    ax.set_xlabel("膜厚 d (μm)，折射率 1.5")
+    ax.set_ylabel("条纹可见度包络")
+    ax.set_title("相干长度决定薄膜还能不能出彩", pad=20)
+    ax.legend(loc="upper center", ncol=3, bbox_to_anchor=(0.5, 1.02),
+              columnspacing=1.6, handlelength=1.6)
+    fig.tight_layout()
+    save(fig, "fig3-3-film-visibility.png")
 
-    ax2 = fig.add_subplot(gs[1])
-    ax2.set_xlim(0, 1)
-    ax2.set_ylim(0, 1)
-    ax2.axis("off")
-    for i, l in enumerate([470, 500, 532, 580, 610]):
-        c0 = M_XYZ2RGB_PUBLISHED @ np.array([cie_x(l), cie_y(l), cie_z(l)])
-        c0 = c0 / c0.max()
-        cc = srgb_encode(np.clip(c0, 0, 1))
-        yy = 0.86 - i * 0.18
-        ax2.add_patch(plt.Rectangle((0.06, yy - 0.07), 0.18, 0.13, color=cc,
-                                    ec="#3a3a3a", lw=0.6))
-        ax2.text(0.30, yy - 0.005, "%d nm" % l, fontsize=8, va="center")
-        ax2.text(0.54, yy - 0.005, "(%+.2f, %+.2f, %+.2f)" % tuple(c0),
-                 fontsize=7.6, va="center", color="#444")
-    ax2.text(0.06, 0.97, "裁到 [0,1] 之后的显示色", fontsize=8.5, va="center")
-    save(fig, "fig3-3-gamut-clip.png")
+
+# ------------------------------------------------------------------ 图 3-4
+def fig3_4():
+    """散斑对比度与被平均的模式数。"""
+    M = np.logspace(0, 6, 300)
+    C = 1.0 / np.sqrt(M)
+    fig, ax = plt.subplots(figsize=(6.2, 3.2))
+    ax.loglog(M, C, color=PURPLE, lw=1.8)
+    ax.axhline(0.05, color=RED, lw=1.0, ls="--")
+    ax.text(1.15, 0.078, "对比度 5%%，肉眼大致可忽睔", fontsize=8, color=RED)
+    for m0, lab in ((1, "单模激光"), (12, "多模激光"), (1e4, "宽谱光源")):
+        ax.plot([m0], [1 / np.sqrt(m0)], "o", ms=4, color=PURPLE)
+        ax.annotate(lab, xy=(m0, 1 / np.sqrt(m0)), xytext=(m0 * 2.2, 1 / np.sqrt(m0) * 0.34),
+                    fontsize=8, color="#3c4654")
+    ax.set_xlim(1, 1e6)
+    ax.set_ylim(1e-3, 1.5)
+    ax.set_xlabel("参与的独立模式数 M")
+    ax.set_ylabel("散斑对比度 $1/\\sqrt{M}$")
+    ax.set_title("散斑：只在模式数少的时候露头", pad=6)
+    fig.tight_layout()
+    save(fig, "fig3-4-speckle.png")
 
 
 fig3_1()
 fig3_2()
 fig3_3()
+fig3_4()
+
+

@@ -88,14 +88,20 @@ def visibility(n_lights, frames, seed=0, p_lit=0.5, stickiness=0.93, soft=True,
     return v
 
 
-def motion_modulation(n_lights, frames, amp=0.0, seed=0, rate=0.25):
-    """m[T, N]：随帧变化的调制因子，模拟物体移动后距离与夹角的变化。"""
+def motion_modulation(n_lights, frames, amp=0.0, seed=0, rate=0.25, mode="sine"):
+    """m[T, N]：随帧变化的调制因子，模拟物体移动后距离与夹角的变化。
+
+    mode="sine" 是来回摆动，mode="ramp" 是单向漂移（相机一直朝一个方向走）。
+    """
     if amp == 0.0:
         return np.ones((frames, n_lights))
     rng = np.random.default_rng(seed + 104729)
+    t = np.arange(frames)[:, None]
+    if mode == "ramp":
+        g = rng.uniform(0.5, 1.5, n_lights)
+        return 1.0 + amp * (t / max(frames - 1, 1)) * g[None, :]
     ph = rng.uniform(0, 2 * np.pi, n_lights)
     w = rng.uniform(0.6, 1.4, n_lights) * rate
-    t = np.arange(frames)[:, None]
     return 1.0 + amp * np.sin(w[None, :] * t + ph[None, :])
 
 

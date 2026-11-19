@@ -5,93 +5,130 @@ from figstyle import *
 from speclib import *
 
 LAM = grid()
-
-
-def media():
-    """三种吸收介质的系数（单位 1/mm）。散射很小，直接用 Beer–Lambert。"""
-    red_ink_a = 2.2 * gaussian_line(LAM, 520, 85) + 1.4 * gaussian_line(LAM, 440, 55) + 0.04
-    red_ink_s = 0.10 * gaussian_line(LAM, 520, 120)
-    green_glass_a = 1.5 * gaussian_line(LAM, 655, 75) + 0.02
-    green_glass_s = np.full_like(LAM, 0.002)
-    amber_glass_a = 1.8 * gaussian_line(LAM, 445, 70) + 0.03
-    amber_glass_s = np.full_like(LAM, 0.002)
-    milk_a = 0.02 + 0.10 * gaussian_line(LAM, 420, 60)
-    milk_s = 12.0 * (LAM / 550.0) ** -1.2
-    return [("红墨水", red_ink_a, red_ink_s, RED),
-            ("绿玻璃", green_glass_a, green_glass_s, GREEN),
-            ("茶色玻璃", amber_glass_a, amber_glass_s, GOLD),
-            ("牛奶", milk_a, milk_s, "#7a7a7a")]
+LO, HI = 380.0, 780.0
 
 
 # ------------------------------------------------------------------ 图 10-1
-def fig10_1():
-    fig, axes = plt.subplots(1, 2, figsize=(7.0, 3.1), gridspec_kw={"wspace": 0.28})
-    ax = axes[0]
-    for name, sa, ss, col in media():
-        ax.plot(LAM, sa, color=col, lw=1.7, label=name)
-    ax.set_yscale("log")
-    ax.set_xlim(380, 780)
-    ax.set_ylim(1e-3, 30)
-    ax.set_xlabel("波长 λ (nm)")
-    ax.set_ylabel("吸收系数 σa (1/mm)")
-    ax.legend(loc="upper right", fontsize=7.6)
-    ax.set_title("吸收决定颜色", pad=6)
+def fig6_1():
+    """三种波长采样：均匀、分层、按视觉响应。"""
+    rng = np.random.default_rng(7)
+    N = 48
+    uni = rng.uniform(LO, HI, N)
+    strat = LO + (np.arange(N) + rng.uniform(0, 1, N)) * (HI - LO) / N
 
-    ax2 = axes[1]
-    for name, sa, ss, col in media():
-        ax2.plot(LAM, ss, color=col, lw=1.7, label=name)
-    ax2.set_yscale("log")
+    y = cie_y(LAM)
+    cdf = np.cumsum(y)
+    cdf = np.concatenate([[0], cdf / cdf[-1]])
+    xs = np.concatenate([[LO], LAM])
+    imp = np.interp(rng.uniform(0, 1, N), cdf, xs)
+
+    fig = plt.figure(figsize=(7.0, 3.3))
+    gs = fig.add_gridspec(2, 1, height_ratios=[1.0, 1.0], hspace=0.34)
+
+    ax = fig.add_subplot(gs[0])
+    rows = [(uni, "均匀随机"), (strat, "分层"), (imp, r"按 $\bar{y}$ 采样")]
+    for i, (s, lab) in enumerate(rows):
+        yy = 2 - i
+        ax.plot(s, np.full_like(s, yy), "|", color=PALETTE[i], ms=11, mew=1.2)
+        ax.text(376, yy, lab, ha="right", va="center", fontsize=8.5)
+    ax.set_xlim(376, 784)
+    ax.set_ylim(-0.35, 2.55)
+    ax.set_yticks([])
+    ax.set_xticklabels([])
+    ax.grid(False)
+
+    ax2 = fig.add_subplot(gs[1])
+    ax2.plot(LAM, np.full_like(LAM, 1.0 / (HI - LO)), color=PALETTE[0], lw=1.5,
+             label="均匀的密度 1/400")
+    ax2.plot(LAM, y / (y.sum() * (LAM[1] - LAM[0])), color=PALETTE[2], lw=1.9, label="正比于视觉响应的密度")
     ax2.set_xlim(380, 780)
-    ax2.set_ylim(1e-3, 40)
+    ax2.set_ylim(0, 0.0108)
     ax2.set_xlabel("波长 λ (nm)")
-    ax2.set_ylabel("散射系数 σs (1/mm)")
-    ax2.legend(loc="lower left", fontsize=7.6)
-    ax2.set_title("散射差四个量级", pad=6)
-    save(fig, "fig10-1-coefficients.png")
+    ax2.set_ylabel("概率密度 (1/nm)")
+    ax2.legend(loc="upper right")
+    save(fig, "fig10-1-sampling.png")
 
 
 # ------------------------------------------------------------------ 图 10-2
-def fig10_2():
-    """厚度 × 介质 的颜色矩阵。"""
-    fig, ax = plt.subplots(figsize=(6.4, 3.0))
-    ax.set_xlim(0, 1)
-    ax.set_ylim(0, 1)
-    ax.axis("off")
-    thick = [1, 5, 20, 80]
-    white = blackbody(LAM, 6504.0)
-    for j, t in enumerate(thick):
-        ax.text(0.20 + 0.19 * j, 0.92, "%d mm" % t, fontsize=8, ha="center", va="center")
-    for i, (name, sa, ss, col) in enumerate(media()[:3]):
-        ax.text(0.01, 0.73 - i * 0.245, name, fontsize=8.4, va="center")
-        for j, t in enumerate(thick):
-            T = np.exp(-(sa + ss) * t)
-            xyz = spectrum_to_xyz(LAM, white * T)
-            c = srgb_encode(np.clip(M_XYZ2RGB_PUBLISHED @ (xyz / spectrum_to_xyz(LAM, white)[1]) / 1.2, 0, 1))
-            ax.add_patch(plt.Rectangle((0.12 + 0.19 * j, 0.62 - i * 0.245), 0.16, 0.21,
-                                       color=c, ec="#3a3a3a", lw=0.6))
-    ax.text(0.55, 0.02, "6500 K 光源穿过介质之后的颜色", fontsize=8, ha="center", color="#555")
-    save(fig, "fig10-2-slabs.png")
+def _estimate_y(spd, lam_samples, pdf):
+    """Y 的蒙特卡洛估计：mean(f(λ) c(λ) / p(λ))。"""
+    f = np.interp(lam_samples, LAM, spd) * np.interp(lam_samples, LAM, cie_y(LAM))
+    return float(np.mean(f / pdf))
+
+
+def fig6_2():
+    """均匀采样与按响应采样的方差对比。"""
+    spd = blackbody(LAM, 3200.0) * (0.05 + 0.9 * gaussian_line(LAM, 560, 120))
+    truth = float(np.sum(spd * cie_y(LAM)) * (LAM[1] - LAM[0]))
+
+    y = cie_y(LAM)
+    cdf = np.concatenate([[0], np.cumsum(y) / np.cumsum(y)[-1]])
+    y_norm = float(np.sum(y * (LAM[1] - LAM[0])))
+
+    rng = np.random.default_rng(11)
+    Ns = np.array([4, 8, 16, 32, 64, 128, 256])
+    trials = 3000
+    err_u, err_i = [], []
+    for N in Ns:
+        eu, ei = [], []
+        for _ in range(trials):
+            u = rng.uniform(LO, HI, N)
+            eu.append(_estimate_y(spd, u, 1.0 / (HI - LO)) / truth - 1)
+            v = np.interp(rng.uniform(0, 1, N), cdf, np.concatenate([[LO], LAM]))
+            p = np.interp(v, LAM, y) / y_norm
+            ei.append(_estimate_y(spd, v, p) / truth - 1)
+        err_u.append(np.sqrt(np.mean(np.square(eu))))
+        err_i.append(np.sqrt(np.mean(np.square(ei))))
+
+    fig, ax = plt.subplots(figsize=(6.0, 3.1))
+    ax.loglog(Ns, err_u, "o-", color=BLUE, ms=4, label="均匀采样")
+    ax.loglog(Ns, err_i, "s-", color=ACCENT, ms=4, label="按视觉响应采样")
+    ref = err_u[0] * np.sqrt(Ns[0] / Ns)
+    ax.loglog(Ns, ref, ":", color=GREY, lw=1.0, label="1/√N")
+    ax.set_xlabel("波长样本数 N")
+    ax.set_ylabel("Y 的相对 RMS 误差")
+    ax.legend(loc="lower left")
+    ax.set_title("斜率都是 $-1/2$，差的是常数", pad=6)
+    save(fig, "fig10-2-variance.png")
 
 
 # ------------------------------------------------------------------ 图 10-3
-def fig10_3():
-    """自由程的指数分布：不同波长差别很大，采样要用上界。"""
-    fig, ax = plt.subplots(figsize=(6.2, 3.1))
-    sig = {450: 1.20, 550: 0.60, 650: 0.35}
-    t = np.linspace(0, 8, 400)
-    for lam, s, col in [(450, 1.20, BLUE), (550, 0.60, TEAL), (650, 0.35, RED)]:
-        ax.plot(t, s * np.exp(-s * t), color=col, lw=1.7, label="λ = %d nm，σt = %.2f" % (lam, s))
-    smax = 1.55
-    ax.plot(t, smax * np.exp(-smax * t), color=GREY, lw=1.2, ls="--",
-            label="采样用的上界 σmax = %.2f（含 null 碰撞）" % smax)
-    ax.set_xlim(0, 8)
-    ax.set_ylim(0, 1.72)
-    ax.set_xlabel("距离（mm）")
-    ax.set_ylabel("概率密度 (1/mm)")
-    ax.legend(loc="upper right", fontsize=7.4)
-    save(fig, "fig10-3-freepath.png")
+def fig6_3():
+    """波长数 n 与误差：平滑光谱与窄线光谱的不同行为。"""
+    smooth = blackbody(LAM, 3200.0)
+    line = gaussian_line(LAM, 545, 3.0)
+
+    def rms(spd, n, trials=4000, total=256, seed=3):
+        rng = np.random.default_rng(seed)
+        truth = float(np.sum(spd * (LAM[1] - LAM[0])))
+        errs = []
+        paths = total // n
+        step = (HI - LO) / n
+        for _ in range(trials):
+            acc = 0.0
+            for _ in range(paths):
+                hero = rng.uniform(LO, HI)
+                ls = LO + np.mod(hero - LO + np.arange(n) * step, HI - LO)
+                acc += np.interp(ls, LAM, spd).mean()
+            acc /= paths
+            acc *= (HI - LO)
+            errs.append(acc / truth - 1)
+        return float(np.sqrt(np.mean(np.square(errs))))
+
+    ns = [1, 2, 4, 8, 16]
+    e_smooth = [rms(smooth, n) for n in ns]
+    e_line = [rms(line, n) for n in ns]
+
+    fig, ax = plt.subplots(figsize=(6.2, 3.2))
+    ax.semilogy(ns, e_smooth, "o-", color=BLUE, ms=4.5, label="平滑光谱（3200 K 黑体）")
+    ax.semilogy(ns, e_line, "s-", color=ACCENT, ms=4.5, label="窄线光谱（545 nm，宽 3 nm）")
+    ax.set_xticks(ns)
+    ax.set_xlabel("每条路径的波长数 n（总样本数固定为 256）")
+    ax.set_ylabel("估计的相对 RMS 误差")
+    ax.legend(loc="best")
+    save(fig, "fig10-3-samples.png")
 
 
-fig10_1()
-fig10_2()
-fig10_3()
+fig6_1()
+fig6_2()
+fig6_3()

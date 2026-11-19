@@ -5,135 +5,108 @@ from figstyle import *
 from speclib import *
 
 LAM = grid()
-LO, HI = 380.0, 780.0
-N = 4
-STEP = (HI - LO) / N
+LAM1 = grid(380, 780, 1.0)
 
 
 # ------------------------------------------------------------------ 图 7-1
-def fig7_1():
-    """hero wavelength：每组 n 个波长等间隔，整组随 hero 平移。"""
-    rng = np.random.default_rng(5)
-    rows = 14
-    fig, ax = plt.subplots(figsize=(6.8, 3.4))
-    for r in range(rows):
-        hero = rng.uniform(LO, HI)
-        ls = LO + np.mod(hero - LO + np.arange(N) * STEP, HI - LO)
-        ax.plot([LO, HI], [r, r], color=LIGHT, lw=0.6, zorder=0)
-        ax.plot(ls, np.full(N, r), "o", color=PALETTE[r % 4], ms=4.2, zorder=2)
-        ax.plot([ls.min(), ls.max()], [r, r], color=PALETTE[r % 4], lw=1.0, alpha=0.45, zorder=1)
-    ax.set_xlim(LO, HI)
-    ax.set_ylim(-0.8, rows - 0.2)
-    ax.set_yticks([])
+def fig3_1():
+    """CIE 1931 标准观察者的配色函数。"""
+    fig, ax = plt.subplots(figsize=(6.4, 3.2))
+    ax.plot(LAM1, cie_x(LAM1), color=RED, lw=1.7, label=r"$\bar{x}(\lambda)$")
+    ax.plot(LAM1, cie_y(LAM1), color=GREEN, lw=1.7, label=r"$\bar{y}(\lambda)$")
+    ax.plot(LAM1, cie_z(LAM1), color=BLUE, lw=1.7, label=r"$\bar{z}(\lambda)$")
+    ax.axvline(555, color=GREY, lw=0.8, ls=":")
+    ax.annotate("555 nm\n$\\bar{y}$ 的峰值", xy=(556, 1.02), xytext=(492, 1.46),
+                fontsize=8, color="#3c4654",
+                arrowprops=dict(arrowstyle="-", lw=0.6, color=GREY))
+    ax.set_xlim(380, 780)
+    ax.set_ylim(0, 1.85)
     ax.set_xlabel("波长 λ (nm)")
-    ax.set_ylabel("路径编号")
-    ax.grid(False)
-    ax.text(392, rows - 0.9, "每组 4 个波长，间距 100 nm，越过上界后绕回下界",
-            fontsize=8, color="#3c4654")
-    save(fig, "fig7-1-hero.png")
+    ax.set_ylabel("响应")
+    ax.legend(loc="upper right", ncol=1)
+    save(fig, "fig7-1-cmf.png")
 
 
 # ------------------------------------------------------------------ 图 7-2
-def fig7_2():
-    """次级波长的概率密度是 hero 密度的平移。"""
-    def dens(lam, mu=550.0, sg=60.0):
-        return np.exp(-0.5 * ((lam - mu) / sg) ** 2) / (sg * np.sqrt(2 * np.pi))
+def fig3_2():
+    """xy 色度图、光谱轨迹与三个色域三角形。"""
+    Lx = grid(400, 700, 1.0)
+    x, y = xyz_to_xy(cie_xyz_basis(Lx))
+    fig, ax = plt.subplots(figsize=(5.4, 4.3))
+    # 光谱轨迹：按波长上色
+    for i in range(len(Lx) - 1):
+        c = wl_to_srgb(Lx[i], gamma=False)[0]
+        c = 0.25 + 0.75 * np.array(c) / max(c.max(), 1e-6)
+        ax.plot(x[i:i + 2], y[i:i + 2], color=np.clip(c, 0, 1), lw=2.4)
+    # 紫线
+    ax.plot([x[0], x[-1]], [y[0], y[-1]], color="#9a5b8f", lw=1.6, ls="--")
 
-    fig, ax = plt.subplots(figsize=(6.4, 3.1))
-    ax.plot(LAM, dens(LAM), color=ACCENT, lw=1.8, label=r"$p_0(\lambda)$：hero 的密度")
-    ax.plot(LAM, dens(LAM - 100.0), color=BLUE, lw=1.8, ls="--",
-            label=r"$p_1(\lambda)=p_0(\lambda-100)$")
-    peak = float(dens(550.0))
-    ax.plot([550.0], [peak], "o", color=ACCENT, ms=5, zorder=3)
-    ax.plot([650.0], [peak], "o", color=BLUE, ms=5, zorder=3)
-    ax.annotate("", xy=(650, peak), xytext=(550, peak),
-                arrowprops=dict(arrowstyle="-|>", lw=0.8, color=GREY, ls=":"))
-    ax.text(560, peak * 1.06, "+100 nm", fontsize=7.8, color="#666")
-    ax.text(544, peak * 0.55, r"$p_0(\lambda_0)$", fontsize=8, color=ACCENT, ha="right")
-    ax.text(624, peak * 0.22, r"$p_1(\lambda_1)=p_0(\lambda_0)$", fontsize=8,
-            color=BLUE, ha="left")
-    ax.set_xlim(380, 780)
-    ax.set_ylim(0, peak * 1.35)
-    ax.set_xlabel("波长 λ (nm)")
-    ax.set_ylabel("概率密度 (1/nm)")
-    ax.legend(loc="upper left")
-    save(fig, "fig7-2-pdf-shift.png")
+    gamuts = [("sRGB / BT.709", [(0.64, 0.33), (0.30, 0.60), (0.15, 0.06)], BLUE),
+              ("Display P3", [(0.680, 0.320), (0.265, 0.690), (0.150, 0.060)], TEAL),
+              ("Rec.2020", [(0.708, 0.292), (0.170, 0.797), (0.131, 0.046)], ACCENT)]
+    for name, tri, col in gamuts:
+        pts = np.array(tri + [tri[0]])
+        ax.plot(pts[:, 0], pts[:, 1], color=col, lw=1.2, label=name)
+    ax.plot(0.3127, 0.3290, "o", color="#333", ms=4)
+    ax.annotate("D65", xy=(0.3127, 0.3290), xytext=(0.335, 0.375), fontsize=8,
+                arrowprops=dict(arrowstyle="-", lw=0.6, color="#666"))
+    ax.text(0.16, 0.83, "520", fontsize=7.5, color="#555")
+    ax.text(0.635, 0.345, "650", fontsize=7.5, color="#555")
+    ax.text(0.145, 0.045, "460", fontsize=7.5, color="#555")
+    ax.set_xlim(0, 0.78)
+    ax.set_ylim(0, 0.88)
+    ax.set_xlabel("色度坐标 x")
+    ax.set_ylabel("色度坐标 y")
+    ax.legend(loc="upper right", fontsize=7.8)
+    save(fig, "fig7-2-chromaticity.png")
 
 
 # ------------------------------------------------------------------ 图 7-3
-def _refract(d, n, eta):
-    cosi = -np.dot(d, n)
-    if cosi < 0:
-        n, cosi, eta = -n, -np.dot(d, n), 1.0 / eta
-    k = 1 - eta ** 2 * (1 - cosi ** 2)
-    if k < 0:
-        return None
-    return eta * d + (eta * cosi - np.sqrt(k)) * n
+def fig3_3():
+    """单色光在 sRGB 里的分量：负值意味着色域外。"""
+    lams = np.arange(430, 681, 25)
+    rgb = []
+    for l in lams:
+        c = M_XYZ2RGB_PUBLISHED @ np.array([cie_x(l), cie_y(l), cie_z(l)])
+        rgb.append(c / c.max())
+    rgb = np.array(rgb)
 
-
-def fig7_3():
-    """色散让两个波长折射到不同方向。"""
-    fig = plt.figure(figsize=(7.0, 3.1))
-    gs = fig.add_gridspec(1, 2, width_ratios=[1.1, 1.0], wspace=0.32)
-
+    fig = plt.figure(figsize=(7.0, 3.2))
+    gs = fig.add_gridspec(1, 2, width_ratios=[1.5, 1.0], wspace=0.30)
     ax = fig.add_subplot(gs[0])
-    thetas = np.linspace(0, 80, 200)
-    for name, col in [("N-BK7", BLUE), ("SF11", ACCENT)]:
-        spread = []
-        for th in thetas:
-            d = np.array([np.sin(np.deg2rad(th)), -np.cos(np.deg2rad(th))])
-            nrm = np.array([0.0, 1.0])
-            d1 = _refract(d, nrm, 1.0 / float(sellmeier(name, 450)))
-            d2 = _refract(d, nrm, 1.0 / float(sellmeier(name, 650)))
-            if d1 is None or d2 is None:
-                spread.append(np.nan)
-                continue
-            ang = np.degrees(np.arccos(np.clip(np.dot(d1, d2), -1, 1)))
-            spread.append(ang)
-        ax.plot(thetas, spread, color=col, lw=1.7, label=name)
-    ax.set_xlabel("入射角（度）")
-    ax.set_ylabel("450 nm 与 650 nm 折射方向夹角（度）")
-    ax.set_xlim(0, 80)
-    ax.legend(loc="upper right")
-    ax.set_title("单次折射的方向分离", pad=6)
+    h = 0.26
+    for j, (col, lab) in enumerate([(RED, "R"), (GREEN, "G"), (BLUE, "B")]):
+        ax.barh(np.arange(len(lams)) + (j - 1) * h, rgb[:, j], height=h * 0.92,
+                color=col, alpha=0.85, label=lab)
+    ax.axvline(0, color="#3c4654", lw=0.9)
+    ax.set_yticks(np.arange(len(lams)))
+    ax.set_yticklabels(["%d" % l for l in lams], fontsize=7.5)
+    ax.set_xlabel("线性 sRGB 分量（按最大分量归一）")
+    ax.set_ylabel("波长 (nm)")
+    ax.set_xlim(-1.15, 1.15)
+    leg = ax.legend(loc="lower left", ncol=3, columnspacing=0.9, frameon=True,
+                    facecolor="white", edgecolor="none", framealpha=0.92)
+    leg.set_zorder(10)
+    ax.set_title("负分量出现在色域之外", pad=6)
 
     ax2 = fig.add_subplot(gs[1])
-    # 60 度等边棱镜：两个界面各折射一次，出射方向的色散角随入射角变化
-    A = np.deg2rad(60.0)
-    nL = np.array([-np.cos(A / 2), np.sin(A / 2)])
-    nR = np.array([np.cos(A / 2), np.sin(A / 2)])
-    ang_in = np.linspace(25, 75, 120)
-    for name, col in [("N-BK7", BLUE), ("SF11", ACCENT)]:
-        spread = []
-        for th in ang_in:
-            outs = []
-            for lam_nm in (400.0, 700.0):
-                n = float(sellmeier(name, lam_nm))
-                d = np.array([np.sin(np.deg2rad(th)), -np.cos(np.deg2rad(th))])
-                d1 = _refract(d, nL, 1.0 / n)
-                if d1 is None:
-                    outs.append(np.nan)
-                    continue
-                d2 = _refract(d1, nR, n)
-                if d2 is None:
-                    outs.append(np.nan)
-                    continue
-                outs.append(np.degrees(np.arctan2(d2[1], d2[0])))
-            spread.append(abs(outs[0] - outs[1]))
-        ax2.plot(ang_in, spread, color=col, lw=1.7, label=name)
-    n_d = float(sellmeier("N-BK7", 587.6))
-    th_min = np.degrees(np.arcsin(n_d * np.sin(A / 2)))
-    ax2.axvline(th_min, color=GREY, lw=0.9, ls=":")
-    ax2.text(th_min + 1.6, 0.95, "最小偏向角\n入射角 %.0f°" % th_min, fontsize=7.4, color="#666")
-    ax2.set_xlabel("棱镜入射角（度）")
-    ax2.set_ylabel("400 与 700 nm 的偏向角之差（度）")
-    ax2.set_xlim(25, 75)
-    ax2.set_ylim(0, 1.15)
-    ax2.legend(loc="lower left")
-    ax2.set_title("整块棱镜的色散角", pad=6)
-    save(fig, "fig7-3-dispersion.png")
+    ax2.set_xlim(0, 1)
+    ax2.set_ylim(0, 1)
+    ax2.axis("off")
+    for i, l in enumerate([470, 500, 532, 580, 610]):
+        c0 = M_XYZ2RGB_PUBLISHED @ np.array([cie_x(l), cie_y(l), cie_z(l)])
+        c0 = c0 / c0.max()
+        cc = srgb_encode(np.clip(c0, 0, 1))
+        yy = 0.86 - i * 0.18
+        ax2.add_patch(plt.Rectangle((0.06, yy - 0.07), 0.18, 0.13, color=cc,
+                                    ec="#3a3a3a", lw=0.6))
+        ax2.text(0.30, yy - 0.005, "%d nm" % l, fontsize=8, va="center")
+        ax2.text(0.54, yy - 0.005, "(%+.2f, %+.2f, %+.2f)" % tuple(c0),
+                 fontsize=7.6, va="center", color="#444")
+    ax2.text(0.06, 0.97, "裁到 [0,1] 之后的显示色", fontsize=8.5, va="center")
+    save(fig, "fig7-3-gamut-clip.png")
 
 
-fig7_1()
-fig7_2()
-fig7_3()
+fig3_1()
+fig3_2()
+fig3_3()

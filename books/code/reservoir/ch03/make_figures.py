@@ -2,83 +2,88 @@ import sys, pathlib
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[3] / "common"))
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1]))
 from figstyle import *
-import ris
-
-SEEDS = range(8)
-BASE = dict(grid=8, frames=32, M=4, cap=32, amp=0.1, radius=1)
-
-
-def err_curve(cfg, seeds=SEEDS):
-    e, m = [], []
-    for s in seeds:
-        r = ris.run(seed=s, **cfg)
-        e.append(np.abs(r["est"] / r["truth"] - 1).mean(axis=1))
-        m.append(r["m"].mean(axis=1))
-    return np.mean(e, axis=0), np.mean(m, axis=0)
+import lab
 
 
 def fig3_1():
-    fig, ax = plt.subplots(figsize=(6.3, 3.6))
-    for cfg, lab, col, st in [
-            (dict(temporal=False, spatial=False), "不复用", GREY, "o-"),
-            (dict(temporal=True, spatial=False), "时间复用", BLUE, "s-"),
-            (dict(temporal=True, spatial=True), "时间 + 空间复用", ACCENT, "D-")]:
-        c = dict(BASE)
-        c.update(cfg)
-        e, m = err_curve(c)
-        ax.plot(np.arange(1, len(e) + 1), e, st, ms=3, color=col, label=lab)
-        print(f"{lab}: 帧1 {e[0]:.3f} 帧8 {e[7]:.3f} 帧32 {e[-1]:.3f}，M 末 {m[-1]:.0f}")
+    fig, axes = plt.subplots(1, 2, figsize=(6.9, 3.2))
+    ax = axes[0]
+    k = np.linspace(0.001, 1, 500)
+    for w, lab_, col, ls in [(1.0, "$w=1$", BLUE, "-"), (4.0, "$w=4$", ACCENT, "--")]:
+        ax.plot(k, w * k ** (w - 1), ls, color=col, label=lab_)
+    ax.axvline(0.6, color=GREY, lw=1.0)
+    ax.text(0.61, 3.3, "当前 key", fontsize=7.5, color=GREY)
+    ax.fill_between(k[k > 0.6], 0, 4 * k[k > 0.6] ** 3, color=ACCENT, alpha=0.12, lw=0)
+    ax.set_xlabel("key 值 $k=u^{1/w}$")
+    ax.set_ylabel("概率密度")
+    ax.set_ylim(0, 4.6)
+    ax.legend(loc="upper left")
+    ax.set_title("key 的分布随权重的变化", fontsize=9)
+    note(ax, "$p(k)=w\\,k^{w-1}$", x=0.52, y=0.55)
+
+    ax = axes[1]
+    rng = np.random.default_rng(11)
+    w = np.array([1, 2, 3, 5, 8, 13, 21, 34, 55, 89, 140, 220], float)
+    w = w / w.sum()
+    trials = 120000
+    cnt = np.zeros(w.size)
+    for _ in range(trials):
+        cnt[lab.wrs_ares(w, rng)] += 1
+    freq = cnt / trials
+    ax.plot([1e-3, 0.3], [1e-3, 0.3], color=GREY, ls=":", lw=1.0)
+    ax.errorbar(w, freq, yerr=np.sqrt(w * (1 - w) / trials), fmt="o", ms=3.6,
+                color=ACCENT, ecolor=LIGHT, elinewidth=0.8, capsize=2,
+                label="A-Res 实测")
+    ax.set_xscale("log")
     ax.set_yscale("log")
-    ax.set_yticks([0.15, 0.2, 0.3, 0.5, 0.7, 1.0])
-    ax.set_yticklabels(["0.15", "0.2", "0.3", "0.5", "0.7", "1"])
-    ax.set_ylim(0.14, 1.0)
-    ax.yaxis.set_minor_locator(plt.NullLocator())
-    ax.set_xlabel("帧")
-    ax.set_ylabel("平均相对误差")
-    ax.legend(loc="lower left")
-    save(fig, "fig3-1-frames.png")
+    ax.set_xlabel("理论权重 $w_i/W$")
+    ax.set_ylabel("被选中的频率")
+    ax.legend(loc="upper left")
+    ax.set_title("选择频率与权重成正比", fontsize=9)
+    print("ares max dev", np.abs(freq - w).max())
+    fig.tight_layout()
+    save(fig, "fig3-1-keys.png")
 
 
 def fig3_2():
+    ns = np.unique(np.round(np.geomspace(8, 20000, 14)).astype(int))
+    draws = [lab.wrs_skip_cost(n, 3000, 5) for n in ns]
     fig, ax = plt.subplots(figsize=(6.3, 3.4))
-    caps = [4, 8, 16, 32, 64, 128]
-    rows = {4: [], 16: [], 32: []}
-    for cap in caps:
-        e, _ = err_curve(dict(BASE, cap=cap))
-        for f in rows:
-            rows[f].append(e[f - 1])
-    for (f, ys), col, mk in zip(rows.items(), [SKY, TEAL, ACCENT], ["o-", "s-", "D-"]):
-        ax.plot(caps, ys, mk, ms=3.5, color=col, label=f"第 {f} 帧")
-        print(f"cap={cap} 第{f}帧={ys[-1]:.3f}")
-    ax.set_xscale("log", base=2)
-    ax.set_yticks([0.15, 0.2, 0.3, 0.4, 0.6, 0.8])
-    ax.set_yticklabels(["0.15", "0.2", "0.3", "0.4", "0.6", "0.8"])
-    ax.yaxis.set_minor_locator(plt.NullLocator())
-    ax.set_xticks(caps)
-    ax.set_xticklabels([str(c) for c in caps])
-    ax.set_xlabel("候选数上限")
-    ax.set_ylabel("平均相对误差")
-    ax.legend(loc="upper right")
-    save(fig, "fig3-2-mcap.png")
+    ax.plot(ns, ns, color=BLUE, label="逐项比较：每次一个随机数")
+    ax.plot(ns, draws, "o-", ms=3.5, color=ACCENT, label="跳步：只在接受时取随机数")
+    ax.plot(ns, 2 * np.log(ns) + 3, "--", color=GREY, lw=1.0, label="约 $2\\ln n$")
+    ax.set_xscale("log")
+    ax.set_yscale("log")
+    ax.set_xlabel("流长度 $n$")
+    ax.set_ylabel("均匀随机数消耗")
+    ax.legend(loc="upper left")
+    for n, d in zip(ns[::3], draws[::3]):
+        ax.annotate(f"{d:.0f}", (n, d), textcoords="offset points", xytext=(2, -10),
+                    fontsize=6.8, color=ACCENT)
+    save(fig, "fig3-2-cost.png")
 
 
 def fig3_3():
-    b = ris.make_scene(64, 2, 1, "zipf", 1.0)
-    r = b[0] / b[1]
-    order = np.argsort(-b[0])
-    fig, ax = plt.subplots(figsize=(6.3, 3.3))
-    ax.plot(np.arange(1, 65), r[order], "o-", ms=3, color=BLUE, lw=1.2)
-    med = np.median(r)
-    ax.axhline(med, color=ACCENT, ls="--", lw=1.2)
-    ax.text(63, med * 1.12, f"中位数 {med:.2f}", ha="right", color=ACCENT, fontsize=8)
-    ax.set_yscale("log")
-    ax.set_yticks([0.2, 0.35, 0.5, 1.0, 2.0, 3.0])
-    ax.set_yticklabels(["0.2", "0.35", "0.5", "1", "2", "3"])
-    ax.yaxis.set_minor_locator(plt.NullLocator())
-    ax.set_xlabel("灯，按像素 i 的目标函数排序")
-    ax.set_ylabel("两像素目标函数之比")
-    save(fig, "fig3-3-ratio.png")
-    print(f"比值 {r.min():.2f} 到 {r.max():.2f}，中位数 {med:.2f}")
+    rng = np.random.default_rng(3)
+    wa = rng.random(18) * 2 + 0.2
+    wb = rng.random(26) * 2 + 0.2
+    ma, mb = 4, 40
+    exact, good, bad = lab.merge_check(wa, wb, ma, mb, trials=80000, seed=3)
+    fig, ax = plt.subplots(figsize=(6.4, 3.5))
+    idx = np.arange(exact.size)
+    ax.plot(idx, exact, "o", ms=3.4, color=INK, label="精确：$w_i/W$")
+    ax.plot(idx, good, "x", ms=5, color=TEAL, label="按 $W$ 合并")
+    ax.plot(idx, bad, "^", ms=3.6, color=RED, mfc="none", label="按 $W\\cdot M$ 合并")
+    ax.axvline(18 - 0.5, color=LIGHT, lw=1.0)
+    ax.text(9, 0.052, "$M=4$", ha="center", fontsize=8, color=GREY)
+    ax.text(31, 0.052, "$M=40$", ha="center", fontsize=8, color=GREY)
+    ax.set_xlabel("候选在合并池中的序号")
+    ax.set_ylabel("被选中的频率")
+    ax.set_ylim(0, 0.085)
+    ax.legend(loc="upper left", fontsize=7.5)
+    print("good dev", np.abs(good - exact).max(), "bad dev", np.abs(bad - exact).max())
+    print("b 侧总概率 exact", exact[18:].sum(), "bad", bad[18:].sum())
+    save(fig, "fig3-3-merge.png")
 
 
 fig3_1()

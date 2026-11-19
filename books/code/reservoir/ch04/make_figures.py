@@ -5,153 +5,126 @@ from figstyle import *
 import ris
 
 N = 64
-B2 = ris.make_scene(N, 2, 0, "zipf", 0.6)
-BA, BB = B2[0], B2[1]
-V = ris.visibility(N, 1, 3, soft=True, lo=0.7, hi=1.0)[0]
-TRUTH = float(BA @ V)
-M_A = 4
+B = ris.make_scene(N, 1, 3, "zipf")[0]
+V = ris.visibility(N, 1, 3, 0.62, soft=False)[0]
+F = B * V
+TRUTH = F.sum()
 
 
-def merge_experiment(M, T, rng, mode="approx"):
-    """把像素 B 的蓄水池并进 A。mode: none / approx / exact"""
-    p = np.full(N, 1.0 / N)
-    idx_b = rng.integers(0, N, size=(T, M))
-    w_b = BB[idx_b] / p[idx_b]
-    W_B = w_b.sum(axis=1)
-    cdf = np.cumsum(w_b, axis=1) / W_B[:, None]
-    u = rng.random(T)
-    sel = np.minimum((u[:, None] > cdf).sum(axis=1), M - 1)
-    y_b = np.take_along_axis(idx_b, sel[:, None], axis=1)[:, 0]
-
-    if mode == "exact":
-        W_in = (BA[idx_b] / p[idx_b]).sum(axis=1)
-    elif mode == "approx":
-        W_in = W_B * BA[y_b] / BB[y_b]
-    else:
-        W_in = W_B
-
-    idx_a = rng.integers(0, N, size=(T, M_A))
-    w_a = BA[idx_a] / p[idx_a]
-    W_A = w_a.sum(axis=1)
-    cdf_a = np.cumsum(w_a, axis=1) / W_A[:, None]
-    ua = rng.random(T)
-    sa = np.minimum((ua[:, None] > cdf_a).sum(axis=1), M_A - 1)
-    y_a = np.take_along_axis(idx_a, sa[:, None], axis=1)[:, 0]
-
-    tot = W_A + W_in
-    y = np.where(rng.random(T) < W_in / tot, y_b, y_a)
-    return V[y] * tot / (M_A + M)
+def ris_estimate(M, rng, phat=None, shade_field=None):
+    phat = B if phat is None else phat
+    y, wsum = ris.ris_step(phat[None, :], M, rng)
+    y = int(y[0])
+    ph = max(phat[y], 1e-300)
+    return F[y] * (wsum[0] / M) / ph
 
 
 def fig4_1():
     rng = np.random.default_rng(1)
-    Ms = [1, 2, 4, 8, 16, 32, 64, 128, 256]
-    fig, ax = plt.subplots(figsize=(6.3, 3.5))
-    for mode, lab, col, mk in [("none", "不换算", RED, "v-"),
-                               ("approx", "单点换算", ACCENT, "o-"),
-                               ("exact", "逐候选换算", TEAL, "s-")]:
-        bs = [merge_experiment(M, 150000, rng, mode).mean() / TRUTH - 1 for M in Ms]
-        ax.plot(Ms, np.abs(bs) * 100, mk, ms=3.4, color=col, label=lab)
-        print(f"{lab}: " + " ".join(f"{b * 100:+.1f}%" for b in bs))
-    ax.set_xscale("log", base=2)
-    ax.set_yscale("log")
-    ax.set_xticks(Ms)
-    ax.set_xticklabels([str(m) for m in Ms])
-    ax.set_yticks([0.05, 0.1, 0.5, 1, 2, 5, 10, 20])
-    ax.set_yticklabels(["0.05", "0.1", "0.5", "1", "2", "5", "10", "20"])
-    ax.set_xlabel("被合并蓄水池的候选数 M（本像素固定 4 个）")
-    ax.set_ylabel("偏差的绝对值（百分比）")
-    ax.legend(loc="upper right")
-    save(fig, "fig4-1-merge-bias.png")
-
-
-def cap_experiment(mode, M=8, frames=48, trials=400, cap=32):
-    b = ris.make_scene(N, 1, 0, "zipf")[0]
-    vis = ris.visibility(N, frames, 0, soft=True, lo=0.7, hi=1.0)
-    mot = ris.motion_modulation(N, frames, 0.3, 0)
-    out = []
-    for s in range(trials):
-        rng = np.random.default_rng(1000 + s)
-        prev, seq = None, []
-        for t in range(frames):
-            phat = b * mot[t]
-            y, ws = ris.ris_step(phat[None, :], M, rng)
-            cur = ris.Res(y, ws, np.array([M]), np.array([phat[y[0]]]))
-            if prev is not None:
-                phc = np.array([phat[prev.y[0]]])
-                if mode == "scale":
-                    cur = ris.Res.combine(cur, prev, phc, cap, rng)
-                elif mode == "keepM":
-                    wb = prev.wsum * phc / prev.ph
-                    tot = cur.wsum + wb
-                    pick = rng.random(1) < wb / tot
-                    cur = ris.Res(np.where(pick, prev.y, cur.y), tot,
-                                  np.array([cap]), np.where(pick, phc, cur.ph))
-                else:
-                    if (cur.m + prev.m)[0] > cap:
-                        prev = None
-                    else:
-                        cur = ris.Res.combine(cur, prev, phc, cap, rng)
-            seq.append(float(ris.shade(b[None, :], (vis[t] * mot[t])[None, :],
-                                       cur, phat[None, :])[0]))
-            prev = cur
-        out.append(seq)
-    out = np.array(out)
-    truth = np.array([float((b * mot[t] * vis[t]).sum()) for t in range(frames)])
-    rel = (out / truth[None, :] - 1).mean(axis=0)
-    return np.cumsum(rel) / np.arange(1, frames + 1)
+    Ms = [1, 4, 32]
+    trials = 20000
+    fig, axes = plt.subplots(1, 3, figsize=(7.0, 2.9), sharey=True)
+    tgt = B / B.sum()
+    for ax, M in zip(axes, Ms):
+        cnt = np.zeros(N)
+        for _ in range(trials):
+            y, _ = ris.ris_step(B[None, :], M, rng)
+            cnt[int(y[0])] += 1
+        order = np.argsort(-tgt)
+        ax.bar(np.arange(N), cnt[order] / trials, color=SKY, width=0.85,
+               edgecolor="none", label="选中频率" if M == Ms[0] else None)
+        ax.plot(np.arange(N), tgt[order], color=ACCENT, lw=1.6,
+                label="目标分布" if M == Ms[0] else None)
+        ax.set_title(f"$M={M}$", fontsize=9)
+        ax.set_xlabel("灯（按目标权重排序）")
+        top = int(np.argmax(tgt))
+        print(f"M={M} 最强灯选中频率 {cnt[top] / trials:.3f} 目标 {tgt[top]:.3f}")
+    axes[0].set_ylabel("频率")
+    axes[0].legend(loc="upper right", fontsize=7.5)
+    fig.tight_layout()
+    save(fig, "fig4-1-approach.png")
 
 
 def fig4_2():
-    fig, ax = plt.subplots(figsize=(6.3, 3.5))
-    for mode, lab, col, mk in [("scale", "按比例缩放权重和", TEAL, "s-"),
-                               ("drop", "超限时丢弃传入的蓄水池", BLUE, "o-"),
-                               ("keepM", "只改 M，不缩放权重和", RED, "v-")]:
-        m = cap_experiment(mode)
-        ax.plot(np.arange(1, len(m) + 1), np.abs(m) * 100, mk, ms=3, color=col, label=lab)
-        print(f"{lab}: 帧8 {m[7] * 100:+.2f}% 帧48 {m[-1] * 100:+.1f}%")
+    rng = np.random.default_rng(2)
+    Ms = [1, 2, 4, 8, 16, 32, 64]
+    trials = 30000
+    ris_std, mc_std = [], []
+    for M in Ms:
+        e = np.array([ris_estimate(M, rng) for _ in range(trials)])
+        ris_std.append(e.std() / TRUTH)
+        e = np.array([N * np.mean(F[rng.integers(0, N, M)]) for _ in range(trials)])
+        mc_std.append(e.std() / TRUTH)
+        print(f"M={M} RIS {ris_std[-1]:.3f} 均匀 {mc_std[-1]:.3f}")
+
+    fig, axes = plt.subplots(1, 2, figsize=(6.9, 3.3))
+    ax = axes[0]
+    ax.plot(Ms, mc_std, "s-", ms=4, color=BLUE, label="直接采样，$M$ 条阴影光线")
+    ax.plot(Ms, ris_std, "o-", ms=4, color=ACCENT, label="RIS，$M$ 次灯求值 + 1 条阴影光线")
+    ax.axhline(0.485, color=GREY, ls=":", lw=1.0)
+    ax.text(1.0, 0.52, "按 $b$ 完美采样", fontsize=7, color=GREY)
+    ax.set_xscale("log", base=2)
     ax.set_yscale("log")
-    ax.set_xlabel("帧")
-    ax.set_ylabel("累计偏差的绝对值（百分比）")
-    ax.yaxis.set_minor_locator(plt.NullLocator())
-    ax.legend(loc="upper left")
-    save(fig, "fig4-2-cap.png")
+    ax.set_xlabel("候选数 / 样本数 $M$")
+    ax.set_ylabel("相对标准差")
+    ax.legend(loc="lower left", fontsize=7)
+    ax.set_ylim(0.2, 3)
+    ax.set_title("同样的 $M$", fontsize=9)
+
+    ax = axes[1]
+    ray = 20.0
+    mc_cost = [M * (1 + ray) for M in Ms]
+    ris_cost = [M * 1.0 + ray for M in Ms]
+    ax.plot(mc_cost, mc_std, "s-", ms=4, color=BLUE, label="直接采样")
+    ax.plot(ris_cost, ris_std, "o-", ms=4, color=ACCENT, label="RIS")
+    ax.set_xscale("log")
+    ax.set_yscale("log")
+    ax.set_xlabel("代价（1 次灯求值 = 1，1 条阴影光线 = 20）")
+    ax.set_ylabel("相对标准差")
+    ax.legend(loc="lower left", fontsize=7.5)
+    ax.set_title("同样的代价", fontsize=9)
+    fig.tight_layout()
+    save(fig, "fig4-2-variance-M.png")
 
 
 def fig4_3():
     rng = np.random.default_rng(3)
-    f = BA * V
-    order = np.argsort(-f)
-    ks = [0, 1, 2, 4, 8, 16, 32]
-    fig, ax = plt.subplots(figsize=(6.3, 3.3))
-    xs, ys = [], []
-    for k in ks:
-        phat = BA.copy()
-        phat[order[:k]] = 0.0
-        T = 400000
-        idx = rng.integers(0, N, size=(T, 8))
+    M = 8
+    trials = 40000
+    phat = F                      # 目标函数里含可见性，出现零权重
+    good, bad = [], []
+    sg = sb = 0.0
+    for i in range(1, trials + 1):
+        sg += ris_estimate(M, rng, phat=phat)
+        good.append(sg / i)
+        # 错误做法：丢掉零权重候选，M 改成非零个数
+        idx = rng.integers(0, N, M)
         w = phat[idx] * N
-        ok = w.sum(axis=1) > 0
-        cdf = np.cumsum(w, axis=1) / np.maximum(w.sum(axis=1), 1e-30)[:, None]
-        u = rng.random(T)
-        sel = np.minimum((u[:, None] > cdf).sum(axis=1), 7)
-        y = np.take_along_axis(idx, sel[:, None], axis=1)[:, 0]
-        val = BA[y] * V[y] * N * (w.sum(axis=1) / 8) / np.maximum(phat[y] * N, 1e-30)
-        est = np.where(ok, val, 0.0)
-        share = f[order[:k]].sum() / TRUTH
-        bias = est.mean() / TRUTH - 1
-        xs.append(share * 100)
-        ys.append(bias * 100)
-        print(f"k={k}: 被置零的贡献占比 {share * 100:.1f}%，实测偏差 {bias * 100:+.1f}%")
-    ax.plot(xs, ys, "o-", ms=4, color=RED, label="实测")
-    ax.plot([0, max(xs)], [0, -max(xs)], ls="--", color=GREY, lw=1.1, label="偏差等于负的缺失份额")
-    ax.set_xlabel("目标函数为零、实际有贡献的那部分占比（%）")
-    ax.set_ylabel("偏差（%）")
-    ax.legend(loc="lower left")
-    save(fig, "fig4-3-support.png")
+        nz = w > 0
+        idx_nz = idx[nz]
+        if idx_nz.size == 0:
+            sb += 0.0
+            bad.append(sb / i)
+            continue
+        ww = w[nz]
+        p = ww / ww.sum()
+        y = int(rng.choice(idx_nz, p=p))
+        sb += F[y] * (ww.sum() / idx_nz.size) / phat[y]
+        bad.append(sb / i)
+    print(f"真值 {TRUTH:.2f} 正确 {good[-1]:.2f} 错误 {bad[-1]:.2f} 偏差 {(bad[-1]/TRUTH-1)*100:.1f}%")
+    print("非零候选平均个数", np.mean([np.sum(rng.choice(F, M) > 0) for _ in range(2000)]))
+    fig, ax = plt.subplots(figsize=(6.3, 3.4))
+    ax.plot(good, color=ACCENT, lw=1.4, label="按 RIS 定义实现")
+    ax.plot(bad, color=RED, lw=1.4, label="丢掉零权重候选、$M$ 改成非零个数")
+    ax.axhline(TRUTH, color=GREY, ls=":", lw=1.0)
+    ax.text(trials * 0.02, TRUTH * 1.02, f"真值 {TRUTH:.1f}", fontsize=7.5, color=GREY)
+    ax.set_xscale("log")
+    ax.set_xlabel("累计估计次数")
+    ax.set_ylabel("累计平均值")
+    ax.legend(loc="lower right", fontsize=7.5)
+    save(fig, "fig4-3-bias.png")
 
 
 fig4_1()
 fig4_2()
 fig4_3()
-print("真值", round(TRUTH, 3))
