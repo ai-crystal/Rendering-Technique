@@ -1,6 +1,6 @@
 # 附录 C　参考文献
 
-只列本册引用过或直接依赖的文献。作者、年份、刊物按原文，页码与 DOI 从略以免出错。
+只列本书引用过或直接依赖的文献。作者、年份、刊物按原文，页码与 DOI 从略以免出错。
 
 ## 毛发散射模型
 
@@ -10,7 +10,7 @@
 
 **Marschner, S. R., Jensen, H. W., Cammarano, M., Worley, S., Hanrahan, P. (2003).** Light Scattering from Human Hair Fibers. *ACM Transactions on Graphics*, 22(3), SIGGRAPH 2003.
 
-把散射分成 R、TT、TRT 三条路径，并引入方位角分布与纵向分布的可分离形式。本册第 3、4 章的基础。
+把散射分成 R、TT、TRT 三条路径，并引入方位角分布与纵向分布的可分离形式。本书第 3、4 章的基础。
 
 **Zinke, A., Sobottka, G., Magnor, M. (2008).** Dual Scattering Approximation for Fast Multiple Scattering in Hair. *ACM Transactions on Graphics*, 27(3), SIGGRAPH 2008.
 
@@ -46,7 +46,7 @@
 
 **Pharr, M., Jakob, W., Humphreys, G.** *Physically Based Rendering: From Theory to Implementation*. Morgan Kaufmann.
 
-第 3 版 2016 年，第 4 版 2023 年。本册的黑色素吸收系数取自其中的毛发材质实现；第 8 章的曲线求交与切线插值写法也参照了它。
+第 3 版 2016 年，第 4 版 2023 年。本书的黑色素吸收系数取自其中的毛发材质实现；第 8 章的曲线求交与切线插值写法也参照了它。
 
 **Robbins, C. R.** *Chemical and Physical Behavior of Human Hair*. Springer.
 

@@ -1,6 +1,6 @@
 # 附录 C　参考文献
 
-按作者姓氏首字母排序。这一册的核心推导全部来自下面这些工作，文中的模型名称与年份与这里一致。
+按作者姓氏首字母排序。这本书的核心推导全部来自下面这些工作，文中的模型名称与年份与这里一致。
 
 **Chandrasekhar, S. 1950.** *Radiative Transfer.* Oxford University Press.
 （辐射传输方程的经典处理，H 函数与离散纵标的源头。）
@@ -15,9 +15,9 @@
 （量化扩散：把扩散方程按边界条件展开成离散模式，保留部分方向信息。）
 
 **Donner, C., Jensen, H. W. 2005.** "Light Diffusion in Multi-Layered Translucent Materials." ACM Transactions on Graphics 24(3)（SIGGRAPH 2005）.
-（多极子：用无穷镜像序列处理有限厚度平板与多层介质；文中给出的反射率与透射率对比表是本册第 16 章图 16-2 的数据来源。）
+（多极子：用无穷镜像序列处理有限厚度平板与多层介质；文中给出的反射率与透射率对比表是本书第 16 章图 16-2 的数据来源。）
 
-**Egan, W. G., Hilgeman, T. 1973.** 漫射反射率的多项式拟合。本册第 12 章式 12.9 里的拟合系数转引自 Donner 与 Jensen 2005 的论文（其式 8），原文注明出自这一工作。需要核对原式时请以 Donner 与 Jensen 2005 为直接出处。
+**Egan, W. G., Hilgeman, T. 1973.** 漫射反射率的多项式拟合。本书第 12 章式 12.9 里的拟合系数转引自 Donner 与 Jensen 2005 的论文（其式 8），原文注明出自这一工作。需要核对原式时请以 Donner 与 Jensen 2005 为直接出处。
 
 **Farrell, T. J., Patterson, M. S., Wilson, B. 1992.** "A Diffusion Theory Model of Spatially Resolved, Steady-State Diffuse Reflectance for the Noninvasive Determination of Tissue Optical Properties in Vivo." *Medical Physics* 19(4).
 （扩散偶极子在生物医学光学里的原型，$z_b=2AD$ 与外推边界的来源。）
@@ -29,10 +29,10 @@
 （光子束扩散：把入射光当成有限宽的光束，用扩散解求辐射度，解决了点源近似在近场的奇性。）
 
 **Ishimaru, A. 1978.** *Wave Propagation and Scattering in Random Media.* Academic Press.
-（P1 近似、Fick 定律与扩散方程的标准推导，本册第 9、10 章的组织方式来自这里。）
+（P1 近似、Fick 定律与扩散方程的标准推导，本书第 9、10 章的组织方式来自这里。）
 
 **Jensen, H. W., Marschner, S. R., Levoy, M., Hanrahan, P. 2001.** "A Practical Model for Subsurface Light Transport." ACM SIGGRAPH 2001.
-（偶极子 BSSRDF 与单次散射项的完整模型，本册第 13、14 章的核心。）
+（偶极子 BSSRDF 与单次散射项的完整模型，本书第 13、14 章的核心。）
 
 **Jensen, H. W., Buhler, J. 2002.** "A Rapid Hierarchical Rendering Technique for Translucent Materials." ACM Transactions on Graphics 21(3)（SIGGRAPH 2002）.
 （层次化积分：把 BSSRDF 的面积分加速，是第一次让次表面散射进入实用渲染的工作。）

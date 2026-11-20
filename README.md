@@ -16,7 +16,7 @@
 
 | 册 | 书名 | 一句话 | 页数 | 阅读 | PDF |
 | --- | --- | --- | --- | --- | --- |
-| 00 | 材质渲染的骨架 | 微表面、Fresnel、能量补偿、分层与采样 | 78 | [阅读](books/beginner/README.md) | [下载](output/rendering-00-beginner.pdf) |
+| 00 | 材质渲染的骨架 | 微表面、Fresnel、能量补偿、分层与采样 | 77 | [阅读](books/beginner/README.md) | [下载](output/rendering-00-beginner.pdf) |
 | 01 | 布料渲染 | 纤维散射、纱线模型、sheen 与薄织物透射 | 79 | [阅读](books/cloth/README.md) | [下载](output/rendering-01-cloth.pdf) |
 | 02 | 毛发渲染 | Marschner 模型、双散射、远距离 LOD 与采样 | 64 | [阅读](books/hair/README.md) | [下载](output/rendering-02-hair.pdf) |
 | 03 | 次表面散射与 BSSRDF | 辐射传输、扩散近似、偶极子、随机游走 | 111 | [阅读](books/sss/README.md) | [下载](output/rendering-03-sss.pdf) |
