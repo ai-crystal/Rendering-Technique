@@ -7,7 +7,7 @@
 ---
 
 从普朗克把能量换成一份一份开始，这本书把光从量子描述一路放回渲染方程：光子与相干性怎么变成辐亮度，辐亮度又怎么被压成三个通道。中间每一层近似都标出成立条件，也标出它碎掉的样子。
-后面讲光谱表示、波长采样、hero wavelength、光谱上采样、色散、介质与荧光，最后给出一个能跑的最小实现和一套验证方法。
+后面讲光谱表示、波长采样、hero wavelength、光谱上采样、色散、介质与荧光，再用两章讲神经光谱：怎样用一个张量积把 RGB 变成一条谱线，训练时要造什么数据、会学到什么，以及接进渲染器要付多少代价。
 
 ## 目录
 
@@ -43,6 +43,11 @@
 
 - [第 17 章 一个最小的光谱路径追踪器](#/books/spectral/chapters/ch17)
 - [第 18 章 验证、性能与完整场景](#/books/spectral/chapters/ch18)
+
+**第六篇　神经光谱**
+
+- [第 19 章 神经基底：把 RGB 映射成一条谱线](#/books/spectral/chapters/ch19)
+- [第 20 章 训练、验证与接进渲染器](#/books/spectral/chapters/ch20)
 - [附录 A　符号与单位](#/books/spectral/appendix/app_a)
 - [附录 B　数值速查](#/books/spectral/appendix/app_b)
 - [附录 C　参考文献](#/books/spectral/appendix/app_c)

@@ -90,4 +90,12 @@
 
 [39] M. Nimier-David, D. Vicini, T. Zeltner, W. Jakob. Mitsuba 2: A Retargetable Forward and Inverse Renderer. ACM Transactions on Graphics 38(6), 2019.
 
+神经表示
+
+[40] B. Mildenhall, P. P. Srinivasan, M. Tancik, J. T. Barron, R. Ramamoorthi, R. Ng. NeRF: Representing Scenes as Neural Radiance Fields for View Synthesis. ECCV, 2020.
+
+[41] ycZ. 【光线追踪】供高雅人士品鉴的神经光谱渲染. 知乎专栏“图形学民间科学”, 2025. 网络文章，第 19、20 章的出发点。
+
+这两章用到的合成谱线、网络训练与误差数字，都由 `books/code/spectral/ch19` 与 `ch20` 下的脚本现算，没有引用外部测量数据。网络结构、基底个数与训练步数写在正文里，改参数可以重跑。
+
 书中引用的数字，凡标为"论文报告"的取自上述文献，其余由书中所附脚本按书中公式计算。玻璃的 $n_d$ 与 $V_d$ 是由 Sellmeier 系数在 d、F、C 三条线上求值得到的，用于检查系数是否抄对，与厂家目录值一致到小数点后四位。普朗克常数取 $h=6.62607015\times10^{-34}$ J·s，玻尔兹曼常数取 $k_B=1.380649\times10^{-23}$ J/K，真空光速取 $c=2.99792458\times10^{8}$ m/s，三者都是 2019 年国际单位制修订后的定义值。

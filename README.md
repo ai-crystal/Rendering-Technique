@@ -20,7 +20,7 @@
 | 01 | 布料渲染 | 纤维散射、纱线模型、sheen 与薄织物透射 | 79 | [阅读](books/cloth/README.md) | [下载](output/rendering-01-cloth.pdf) |
 | 02 | 毛发渲染 | Marschner 模型、双散射、远距离 LOD 与采样 | 64 | [阅读](books/hair/README.md) | [下载](output/rendering-02-hair.pdf) |
 | 03 | 次表面散射与 BSSRDF | 辐射传输、扩散近似、偶极子、随机游走 | 111 | [阅读](books/sss/README.md) | [下载](output/rendering-03-sss.pdf) |
-| 04 | 光谱渲染 | 光子与相干、波长采样、上采样、色散与荧光 | 111 | [阅读](books/spectral/README.md) | [下载](output/rendering-04-spectral.pdf) |
+| 04 | 光谱渲染 | 光子与相干、上采样、神经基底、色散与荧光 | 125 | [阅读](books/spectral/README.md) | [下载](output/rendering-04-spectral.pdf) |
 | 05 | 各向异性金属 | 复折射率、各向异性 GGX、拉丝与氧化层 | 59 | [阅读](books/aniso-metal/README.md) | [下载](output/rendering-05-aniso-metal.pdf) |
 | 06 | 体素渲染 | 稀疏体素、体素化、锥追踪与体素光照 | 58 | [阅读](books/voxel/README.md) | [下载](output/rendering-06-voxel.pdf) |
 | 07 | 波动光学渲染 | 衍射、薄膜干涉、结构色与偏振 | 71 | [阅读](books/wave-optics/README.md) | [下载](output/rendering-07-wave-optics.pdf) |

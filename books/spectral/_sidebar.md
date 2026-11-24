@@ -29,6 +29,10 @@
 - **第五篇　实现与验证**
   - [第 17 章 一个最小的光谱路径追踪器](books/spectral/chapters/ch17.md)
   - [第 18 章 验证、性能与完整场景](books/spectral/chapters/ch18.md)
+
+- **第六篇　神经光谱**
+  - [第 19 章 神经基底：把 RGB 映射成一条谱线](books/spectral/chapters/ch19.md)
+  - [第 20 章 训练、验证与接进渲染器](books/spectral/chapters/ch20.md)
   - [附录 A　符号与单位](books/spectral/appendix/app_a.md)
   - [附录 B　数值速查](books/spectral/appendix/app_b.md)
   - [附录 C　参考文献](books/spectral/appendix/app_c.md)
