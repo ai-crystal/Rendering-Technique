@@ -5,7 +5,7 @@ from figstyle import *
 from speclib import *
 
 LAM = grid()
-sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1] / "ch13"))
+sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1] / "ch17"))
 import mini_tracer as mt
 
 
@@ -172,3 +172,49 @@ def fig14_3():
 fig14_1()
 fig14_2()
 fig14_3()
+
+
+# ------------------------------------------------------------------ 图 18-4
+def fig18_4():
+    import numpy as np
+    # 球透镜：f = nR / (2(n-1))，球差让焦点不是一个点而是一段
+    R = 10.0                       # 半径 mm
+    n_of = {450: 1.5280, 550: 1.5200, 650: 1.5150}
+    D = np.linspace(14.30, 14.85, 400)
+
+    fig, axes = plt.subplots(1, 2, figsize=(7.2, 3.0))
+
+    ax = axes[0]
+    for lam, col in [(450, BLUE), (550, TEAL), (650, ACCENT)]:
+        n = n_of[lam]
+        f = n * R / (2.0 * (n - 1.0))
+        # 球差：近轴与边缘光线焦点不同，落在 [f, f*1.02]
+        blur = np.maximum(np.abs(D - f), 0.004)
+        ax.plot(D, 1.0 / blur, color=col, lw=1.8, label="%d nm" % lam)
+    ax.set_xlabel("屏幕到透镜中心的距离（mm）")
+    ax.set_ylabel("轴上相对强度")
+    ax.set_xlim(14.30, 14.85)
+    ax.set_ylim(0, 260)
+    ax.legend(loc="upper right", fontsize=8)
+    panel_label(ax, "a")
+
+    ax = axes[1]
+    rng = np.random.default_rng(3)
+    for lam, col in [(450, BLUE), (550, TEAL), (650, ACCENT)]:
+        n = n_of[lam]
+        f = n * R / (2.0 * (n - 1.0))
+        h = rng.uniform(-R, R, 300000)
+        fh = f * (1.0 + 0.9 * (h / R) ** 2)      # 球差
+        x = h * (1.0 - 14.55 / fh)
+        hist, edges = np.histogram(x, bins=200, range=(-0.30, 0.30), density=True)
+        ax.plot(0.5 * (edges[1:] + edges[:-1]), hist, color=col, lw=1.2,
+                label="%d nm" % lam)
+    ax.set_xlabel("屏幕上的位置（mm）")
+    ax.set_ylabel("光子落点密度")
+    ax.set_xlim(-0.30, 0.30)
+    panel_label(ax, "b")
+
+    save(fig, "fig18-4-caustics.png")
+
+
+fig18_4()
