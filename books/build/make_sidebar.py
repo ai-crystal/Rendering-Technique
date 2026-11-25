@@ -123,7 +123,7 @@ def write_book_readme(cfg):
     lines.append(f"**{cfg.get('series_title', '专业级渲染技术')} · {cfg.get('volume', '')}**　·　"
                  f"{cfg.get('subtitle', '')}")
     lines.append("")
-    lines.append(f"作者：{cfg['author']}　　在线阅读 <https://dezeming.github.io/RenderingSeries/>"
+    lines.append(f"作者：{cfg['author']}　　在线阅读 <https://ai-crystal.github.io/Rendering-Technique/>"
                  f"　　下载：[整本 PDF](../../output/{cfg['pdf']})")
     lines.append("")
     lines.append("---")
@@ -174,7 +174,7 @@ def write_root_readme(books):
     L = ["# 专业级渲染技术", ""]
     L.append("**一套写给渲染实现者的材质专题书**　·　Dr. Dezeming")
     L.append("")
-    L.append("在线阅读：<https://dezeming.github.io/RenderingSeries/>")
+    L.append("在线阅读：<https://ai-crystal.github.io/Rendering-Technique/>")
     L.append("")
     L.append("---")
     L.append("")

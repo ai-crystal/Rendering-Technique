@@ -2,7 +2,7 @@
 
 **专业级渲染技术 · 专题六**　·　从稀疏体素到锥追踪
 
-作者：Dr. Dezeming　　在线阅读 <https://dezeming.github.io/RenderingSeries/>　　下载：[整本 PDF](../../output/rendering-06-voxel.pdf)
+作者：Dr. Dezeming　　在线阅读 <https://ai-crystal.github.io/Rendering-Technique/>　　下载：[整本 PDF](../../output/rendering-06-voxel.pdf)
 
 ---
 

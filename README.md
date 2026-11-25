@@ -2,7 +2,7 @@
 
 **一套写给渲染实现者的材质专题书**　·　Dr. Dezeming
 
-在线阅读：<https://dezeming.github.io/RenderingSeries/>
+在线阅读：<https://ai-crystal.github.io/Rendering-Technique/>
 
 ---
 

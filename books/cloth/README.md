@@ -2,7 +2,7 @@
 
 **专业级渲染技术 · 专题一**　·　从纤维、纱线到织物
 
-作者：Dr. Dezeming　　在线阅读 <https://dezeming.github.io/RenderingSeries/>　　下载：[整本 PDF](../../output/rendering-01-cloth.pdf)
+作者：Dr. Dezeming　　在线阅读 <https://ai-crystal.github.io/Rendering-Technique/>　　下载：[整本 PDF](../../output/rendering-01-cloth.pdf)
 
 ---
 

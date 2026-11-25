@@ -2,7 +2,7 @@
 
 **专业级渲染技术 · 专题三**　·　从辐射传输到可运行的采样器
 
-作者：Dr. Dezeming　　在线阅读 <https://dezeming.github.io/RenderingSeries/>　　下载：[整本 PDF](../../output/rendering-03-sss.pdf)
+作者：Dr. Dezeming　　在线阅读 <https://ai-crystal.github.io/Rendering-Technique/>　　下载：[整本 PDF](../../output/rendering-03-sss.pdf)
 
 ---
 
