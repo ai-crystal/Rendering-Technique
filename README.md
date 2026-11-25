@@ -16,15 +16,15 @@
 
 | 册 | 书名 | 一句话 | 页数 | 阅读 | PDF |
 | --- | --- | --- | --- | --- | --- |
-| 00 | 材质渲染的骨架 | 微表面、Fresnel、能量补偿、分层与采样 | 77 | [阅读](books/beginner/README.md) | [下载](output/rendering-00-beginner.pdf) |
-| 01 | 布料渲染 | 纤维散射、纱线模型、sheen 与薄织物透射 | 79 | [阅读](books/cloth/README.md) | [下载](output/rendering-01-cloth.pdf) |
-| 02 | 毛发渲染 | Marschner 模型、双散射、远距离 LOD 与采样 | 64 | [阅读](books/hair/README.md) | [下载](output/rendering-02-hair.pdf) |
-| 03 | 次表面散射与 BSSRDF | 辐射传输、扩散近似、偶极子、随机游走 | 111 | [阅读](books/sss/README.md) | [下载](output/rendering-03-sss.pdf) |
-| 04 | 光谱渲染 | 光子与相干、上采样、神经基底、色散与荧光 | 125 | [阅读](books/spectral/README.md) | [下载](output/rendering-04-spectral.pdf) |
-| 05 | 各向异性金属 | 复折射率、各向异性 GGX、拉丝与氧化层 | 59 | [阅读](books/aniso-metal/README.md) | [下载](output/rendering-05-aniso-metal.pdf) |
-| 06 | 体素渲染 | 稀疏体素、体素化、锥追踪与体素光照 | 58 | [阅读](books/voxel/README.md) | [下载](output/rendering-06-voxel.pdf) |
-| 07 | 波动光学渲染 | 衍射、薄膜干涉、结构色与偏振 | 71 | [阅读](books/wave-optics/README.md) | [下载](output/rendering-07-wave-optics.pdf) |
-| 08 | 基于储蓄池的渲染 | MIS、带权蓄水池、RIS、ReSTIR 与 GRIS | 94 | [阅读](books/reservoir/README.md) | [下载](output/rendering-08-reservoir.pdf) |
+| 00 | 材质渲染的骨架 | 微表面、Fresnel、能量补偿、分层与采样 | 77 | [阅读](https://ai-crystal.github.io/Rendering-Technique/#/books/beginner/README) | [下载](https://github.com/ai-crystal/Rendering-Technique/raw/main/output/rendering-00-beginner.pdf) |
+| 01 | 布料渲染 | 纤维散射、纱线模型、sheen 与薄织物透射 | 79 | [阅读](https://ai-crystal.github.io/Rendering-Technique/#/books/cloth/README) | [下载](https://github.com/ai-crystal/Rendering-Technique/raw/main/output/rendering-01-cloth.pdf) |
+| 02 | 毛发渲染 | Marschner 模型、双散射、远距离 LOD 与采样 | 64 | [阅读](https://ai-crystal.github.io/Rendering-Technique/#/books/hair/README) | [下载](https://github.com/ai-crystal/Rendering-Technique/raw/main/output/rendering-02-hair.pdf) |
+| 03 | 次表面散射与 BSSRDF | 辐射传输、扩散近似、偶极子、随机游走 | 111 | [阅读](https://ai-crystal.github.io/Rendering-Technique/#/books/sss/README) | [下载](https://github.com/ai-crystal/Rendering-Technique/raw/main/output/rendering-03-sss.pdf) |
+| 04 | 光谱渲染 | 光子与相干、上采样、神经基底、色散与荧光 | 125 | [阅读](https://ai-crystal.github.io/Rendering-Technique/#/books/spectral/README) | [下载](https://github.com/ai-crystal/Rendering-Technique/raw/main/output/rendering-04-spectral.pdf) |
+| 05 | 各向异性金属 | 复折射率、各向异性 GGX、拉丝与氧化层 | 59 | [阅读](https://ai-crystal.github.io/Rendering-Technique/#/books/aniso-metal/README) | [下载](https://github.com/ai-crystal/Rendering-Technique/raw/main/output/rendering-05-aniso-metal.pdf) |
+| 06 | 体素渲染 | 稀疏体素、体素化、锥追踪与体素光照 | 58 | [阅读](https://ai-crystal.github.io/Rendering-Technique/#/books/voxel/README) | [下载](https://github.com/ai-crystal/Rendering-Technique/raw/main/output/rendering-06-voxel.pdf) |
+| 07 | 波动光学渲染 | 衍射、薄膜干涉、结构色与偏振 | 71 | [阅读](https://ai-crystal.github.io/Rendering-Technique/#/books/wave-optics/README) | [下载](https://github.com/ai-crystal/Rendering-Technique/raw/main/output/rendering-07-wave-optics.pdf) |
+| 08 | 基于储蓄池的渲染 | MIS、带权蓄水池、RIS、ReSTIR 与 GRIS | 94 | [阅读](https://ai-crystal.github.io/Rendering-Technique/#/books/reservoir/README) | [下载](https://github.com/ai-crystal/Rendering-Technique/raw/main/output/rendering-08-reservoir.pdf) |
 
 ## 怎么读
 

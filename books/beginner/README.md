@@ -2,7 +2,7 @@
 
 **专业级渲染技术 · 入门篇**　·　从光线追踪器到可用的材质系统
 
-作者：Dr. Dezeming　　在线阅读 <https://ai-crystal.github.io/Rendering-Technique/>　　下载：[整本 PDF](../../output/rendering-00-beginner.pdf)
+作者：Dr. Dezeming　　在线阅读 <https://ai-crystal.github.io/Rendering-Technique/>　　下载：[整本 PDF](https://github.com/ai-crystal/Rendering-Technique/raw/main/output/rendering-00-beginner.pdf)
 
 ---
 
@@ -39,12 +39,6 @@
 
 - [第 13 章 光谱与偏振：材质的另外两个维度](#/books/beginner/chapters/ch13)
 - [第 14 章 材质系统：把公式组织起来](#/books/beginner/chapters/ch14)
-- [附录 A　数学工具箱](#/books/beginner/appendix/app_a)
-- [附录 B　NDF 与遮蔽函数速查](#/books/beginner/appendix/app_b)
-- [附录 C　符号表](#/books/beginner/appendix/app_c)
-- [附录 D　参考文献](#/books/beginner/appendix/app_d)
-- [后记](#/books/beginner/front/afterword)
-- [backcover](#/books/beginner/front/backcover)
 
 ## 重新生成
 

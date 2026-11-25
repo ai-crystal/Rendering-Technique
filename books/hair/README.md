@@ -2,7 +2,7 @@
 
 **专业级渲染技术 · 专题二**　·　从一根纤维到一头头发
 
-作者：Dr. Dezeming　　在线阅读 <https://ai-crystal.github.io/Rendering-Technique/>　　下载：[整本 PDF](../../output/rendering-02-hair.pdf)
+作者：Dr. Dezeming　　在线阅读 <https://ai-crystal.github.io/Rendering-Technique/>　　下载：[整本 PDF](https://github.com/ai-crystal/Rendering-Technique/raw/main/output/rendering-02-hair.pdf)
 
 ---
 
@@ -29,11 +29,6 @@
 - [第 8 章 路径追踪实现](#/books/hair/chapters/ch08)
 - [第 9 章 参数标定与美术控制](#/books/hair/chapters/ch09)
 - [第 10 章 验证](#/books/hair/chapters/ch10)
-- [附录 A　符号表](#/books/hair/appendix/app_a)
-- [附录 B　毛发参数速查](#/books/hair/appendix/app_b)
-- [附录 C　参考文献](#/books/hair/appendix/app_c)
-- [后记](#/books/hair/front/afterword)
-- [backcover](#/books/hair/front/backcover)
 
 ## 重新生成
 

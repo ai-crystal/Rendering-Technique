@@ -2,7 +2,7 @@
 
 **专业级渲染技术 · 专题四**　·　从光子到图像
 
-作者：Dr. Dezeming　　在线阅读 <https://ai-crystal.github.io/Rendering-Technique/>　　下载：[整本 PDF](../../output/rendering-04-spectral.pdf)
+作者：Dr. Dezeming　　在线阅读 <https://ai-crystal.github.io/Rendering-Technique/>　　下载：[整本 PDF](https://github.com/ai-crystal/Rendering-Technique/raw/main/output/rendering-04-spectral.pdf)
 
 ---
 
@@ -48,11 +48,6 @@
 
 - [第 19 章 神经基底：把 RGB 映射成一条谱线](#/books/spectral/chapters/ch19)
 - [第 20 章 训练、验证与接进渲染器](#/books/spectral/chapters/ch20)
-- [附录 A　符号与单位](#/books/spectral/appendix/app_a)
-- [附录 B　数值速查](#/books/spectral/appendix/app_b)
-- [附录 C　参考文献](#/books/spectral/appendix/app_c)
-- [后记](#/books/spectral/front/afterword)
-- [backcover](#/books/spectral/front/backcover)
 
 ## 重新生成
 

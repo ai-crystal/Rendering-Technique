@@ -2,7 +2,7 @@
 
 **专业级渲染技术 · 专题八**　·　从 RIS 到 ReSTIR
 
-作者：Dr. Dezeming　　在线阅读 <https://ai-crystal.github.io/Rendering-Technique/>　　下载：[整本 PDF](../../output/rendering-08-reservoir.pdf)
+作者：Dr. Dezeming　　在线阅读 <https://ai-crystal.github.io/Rendering-Technique/>　　下载：[整本 PDF](https://github.com/ai-crystal/Rendering-Technique/raw/main/output/rendering-08-reservoir.pdf)
 
 ---
 
@@ -37,9 +37,6 @@
 - [第 13 章 参数、收敛与稳定性](#/books/reservoir/chapters/ch13)
 - [第 14 章 验证与调试](#/books/reservoir/chapters/ch14)
 - [第 15 章 SIGGRAPH 2025 的生产现状](#/books/reservoir/chapters/ch15)
-- [附录 A　符号、公式与文献](#/books/reservoir/appendix/app_a)
-- [后记](#/books/reservoir/front/afterword)
-- [backcover](#/books/reservoir/front/backcover)
 
 ## 重新生成
 

@@ -2,7 +2,7 @@
 
 **专业级渲染技术 · 专题七**　·　从衍射到结构色
 
-作者：Dr. Dezeming　　在线阅读 <https://ai-crystal.github.io/Rendering-Technique/>　　下载：[整本 PDF](../../output/rendering-07-wave-optics.pdf)
+作者：Dr. Dezeming　　在线阅读 <https://ai-crystal.github.io/Rendering-Technique/>　　下载：[整本 PDF](https://github.com/ai-crystal/Rendering-Technique/raw/main/output/rendering-07-wave-optics.pdf)
 
 ---
 
@@ -29,10 +29,6 @@
 - [第 8 章 偏振、Stokes 向量与 Mueller 矩阵](#/books/wave-optics/chapters/ch08)
 - [第 9 章 BSDF 的 Mueller 形式与偏振路径追踪](#/books/wave-optics/chapters/ch09)
 - [第 10 章 实现、验证与性能](#/books/wave-optics/chapters/ch10)
-- [附录 A　符号与公式速查](#/books/wave-optics/appendix/app_a)
-- [附录 B　参考文献](#/books/wave-optics/appendix/app_b)
-- [后记](#/books/wave-optics/front/afterword)
-- [backcover](#/books/wave-optics/front/backcover)
 
 ## 重新生成
 

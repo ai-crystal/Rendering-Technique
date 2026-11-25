@@ -2,7 +2,7 @@
 
 **专业级渲染技术 · 专题一**　·　从纤维、纱线到织物
 
-作者：Dr. Dezeming　　在线阅读 <https://ai-crystal.github.io/Rendering-Technique/>　　下载：[整本 PDF](../../output/rendering-01-cloth.pdf)
+作者：Dr. Dezeming　　在线阅读 <https://ai-crystal.github.io/Rendering-Technique/>　　下载：[整本 PDF](https://github.com/ai-crystal/Rendering-Technique/raw/main/output/rendering-01-cloth.pdf)
 
 ---
 
@@ -34,10 +34,6 @@
 - [第 10 章 实时近似与能量补偿](#/books/cloth/chapters/ch10)
 - [第 11 章 参数标定与资产](#/books/cloth/chapters/ch11)
 - [第 12 章 验证与对比](#/books/cloth/chapters/ch12)
-- [附录 A　符号表](#/books/cloth/appendix/app_a)
-- [附录 B　布料参数速查](#/books/cloth/appendix/app_b)
-- [附录 C　参考文献](#/books/cloth/appendix/app_c)
-- [后记](#/books/cloth/front/afterword)
 
 ## 重新生成
 

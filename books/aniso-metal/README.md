@@ -2,7 +2,7 @@
 
 **专业级渲染技术 · 专题五**　·　从复折射率到拉丝高光
 
-作者：Dr. Dezeming　　在线阅读 <https://ai-crystal.github.io/Rendering-Technique/>　　下载：[整本 PDF](../../output/rendering-05-aniso-metal.pdf)
+作者：Dr. Dezeming　　在线阅读 <https://ai-crystal.github.io/Rendering-Technique/>　　下载：[整本 PDF](https://github.com/ai-crystal/Rendering-Technique/raw/main/output/rendering-05-aniso-metal.pdf)
 
 ---
 
@@ -28,11 +28,6 @@
 - [第 7 章 氧化层与薄膜](#/books/aniso-metal/chapters/ch07)
 - [第 8 章 实时近似](#/books/aniso-metal/chapters/ch08)
 - [第 9 章 验证](#/books/aniso-metal/chapters/ch09)
-- [附录 A　符号表](#/books/aniso-metal/appendix/app_a)
-- [附录 B　金属光学常数与 F0](#/books/aniso-metal/appendix/app_b)
-- [附录 C　参考文献](#/books/aniso-metal/appendix/app_c)
-- [后记](#/books/aniso-metal/front/afterword)
-- [backcover](#/books/aniso-metal/front/backcover)
 
 ## 重新生成
 

@@ -50,71 +50,81 @@ def load_books():
     return out
 
 
-def chapters_of(cfg):
-    """返回 [(part_title, [(title, path)])]，path 为仓库相对路径。"""
+def parse_structure(cfg):
+    """把 structure.json 的 body 拆成三部分。
+
+    返回 (groups, appendix, back)：
+      groups  : [(篇名, [(标题, 路径)])]
+      appendix: [(标题, 路径)]
+      back    : [(标题, 路径)]，不含封底
+    """
     book = cfg["name"]
-    groups, cur = [], None
+    groups, app, back = [], [], []
+    cur = None
     for b in cfg["_st"].get("body", []):
         rel = b["file"]
         p = cfg["_dir"] / rel
         if not p.exists():
             continue
+        path = f"books/{book}/{rel}"
         title = first_heading(p)
-        if b["type"] == "part":
+        kind = b["type"]
+        if kind == "part":
             cur = (title, [])
             groups.append(cur)
+        elif kind == "appendix":
+            app.append((title, path))
+        elif rel.endswith("backcover.md"):
+            continue
+        elif rel.startswith("front/"):
+            back.append((title, path))
         else:
             if cur is None:
                 cur = ("", [])
                 groups.append(cur)
-            cur[1].append((title, f"books/{book}/{rel}"))
-    return groups
+            cur[1].append((title, path))
+    return groups, app, back
+
+
+def chapters_of(cfg):
+    return parse_structure(cfg)[0]
 
 
 def write_book_sidebar(cfg):
     book = cfg["name"]
-    lines = []
-    front = cfg["_st"].get("front", [])
-    for rel in front:
-        if rel.endswith("cover.md"):
+    groups, app, back = parse_structure(cfg)
+    lines = ["- [← 系列首页](#/)", ""]
+    for rel in cfg["_st"].get("front", []):
+        if rel.endswith(("cover.md", "titlepage.md", "copyright.md")):
             continue
         p = cfg["_dir"] / rel
         if p.exists():
-            lines.append(f"- [{first_heading(p)}](books/{book}/{rel})")
+            lines.append(f"- [{first_heading(p)}](#/books/{book}/{rel[:-3]})")
     lines.append("")
 
-    groups = chapters_of(cfg)
-    app = []
     for title, chs in groups:
         if not chs:
             continue
         if title:
             lines.append(f"- **{title}**")
             for t, path in chs:
-                lines.append(f"  - [{t}]({path})")
+                lines.append(f"  - [{t}](#/{path[:-3]})")
         else:
             for t, path in chs:
-                lines.append(f"- [{t}]({path})")
+                lines.append(f"- [{t}](#/{path[:-3]})")
         lines.append("")
 
-    for f in cfg["_st"].get("appendix", []):
-        p = cfg["_dir"] / f
-        if p.exists():
-            app.append((first_heading(p), f"books/{book}/{f}"))
     if app:
         lines.append("- **附录**")
         for t, path in app:
-            lines.append(f"  - [{t}]({path})")
+            lines.append(f"  - [{t}](#/{path[:-3]})")
         lines.append("")
 
-    for rel in cfg["_st"].get("back", []):
-        if rel.endswith("backcover.md"):
-            continue
-        p = cfg["_dir"] / rel
-        if p.exists():
-            lines.append(f"- [{first_heading(p)}](books/{book}/{rel})")
+    for t, path in back:
+        lines.append(f"- [{t}](#/{path[:-3]})")
+
     lines.append(f"- [下载 PDF](output/{cfg['pdf']} ':ignore')")
-    (cfg["_dir"] / "_sidebar.md").write_text("\n".join(lines) + "\n", encoding="utf-8")
+    (cfg["_dir"] / "_sidebar.md").write_text(chr(10).join(lines) + chr(10), encoding="utf-8")
 
 
 def write_book_readme(cfg):
@@ -124,7 +134,7 @@ def write_book_readme(cfg):
                  f"{cfg.get('subtitle', '')}")
     lines.append("")
     lines.append(f"作者：{cfg['author']}　　在线阅读 <https://ai-crystal.github.io/Rendering-Technique/>"
-                 f"　　下载：[整本 PDF](../../output/{cfg['pdf']})")
+                 f"　　下载：[整本 PDF](https://github.com/ai-crystal/Rendering-Technique/raw/main/output/{cfg['pdf']})")
     lines.append("")
     lines.append("---")
     lines.append("")
@@ -163,10 +173,10 @@ def write_root_sidebar(books):
     for cfg in books:
         tag = f"{cfg.get('volume_no', '')}　{cfg.get('volume', '')}"
         lines.append(f"- **{tag} · {cfg['title']}**")
-        lines.append(f"  - [本册目录](books/{cfg['name']}/README.md)")
+        lines.append(f"  - [本册目录](#/books/{cfg['name']}/README)")
         lines.append(f"  - [下载 PDF](output/{cfg['pdf']} ':ignore')")
         lines.append("")
-    lines.append("- [系列说明](SERIES.md)")
+    lines.append("- [系列说明](#/SERIES)")
     (ROOT / "_sidebar.md").write_text("\n".join(lines) + "\n", encoding="utf-8")
 
 
@@ -196,8 +206,8 @@ def write_root_readme(books):
     for cfg in books:
         pages = cfg.get("pages", "")
         L.append(f"| {cfg.get('volume_no', '')} | {cfg['title']} | {cfg.get('oneline', '')} | "
-                 f"{pages} | [阅读](books/{cfg['name']}/README.md) | "
-                 f"[下载](output/{cfg['pdf']}) |")
+                 f"{pages} | [阅读](https://ai-crystal.github.io/Rendering-Technique/#/books/{cfg['name']}/README) | "
+                 f"[下载](https://github.com/ai-crystal/Rendering-Technique/raw/main/output/{cfg['pdf']}) |")
     L.append("")
     L.append("## 怎么读")
     L.append("")

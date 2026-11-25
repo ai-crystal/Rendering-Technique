@@ -2,7 +2,7 @@
 
 **专业级渲染技术 · 专题三**　·　从辐射传输到可运行的采样器
 
-作者：Dr. Dezeming　　在线阅读 <https://ai-crystal.github.io/Rendering-Technique/>　　下载：[整本 PDF](../../output/rendering-03-sss.pdf)
+作者：Dr. Dezeming　　在线阅读 <https://ai-crystal.github.io/Rendering-Technique/>　　下载：[整本 PDF](https://github.com/ai-crystal/Rendering-Technique/raw/main/output/rendering-03-sss.pdf)
 
 ---
 
@@ -47,12 +47,6 @@
 - [第 20 章 表面积分与采样器](#/books/sss/chapters/ch20)
 - [第 21 章 从旋钮到参数：多层皮肤、光谱与毛发](#/books/sss/chapters/ch21)
 - [第 22 章 实时近似、验证与调试](#/books/sss/chapters/ch22)
-- [附录 A　符号表](#/books/sss/appendix/app_a)
-- [附录 B　公式速查](#/books/sss/appendix/app_b)
-- [附录 C　参考文献](#/books/sss/appendix/app_c)
-- [附录 D　术语对照](#/books/sss/appendix/app_d)
-- [后记](#/books/sss/front/afterword)
-- [backcover](#/books/sss/front/backcover)
 
 ## 重新生成
 

@@ -2,7 +2,7 @@
 
 **专业级渲染技术 · 专题六**　·　从稀疏体素到锥追踪
 
-作者：Dr. Dezeming　　在线阅读 <https://ai-crystal.github.io/Rendering-Technique/>　　下载：[整本 PDF](../../output/rendering-06-voxel.pdf)
+作者：Dr. Dezeming　　在线阅读 <https://ai-crystal.github.io/Rendering-Technique/>　　下载：[整本 PDF](https://github.com/ai-crystal/Rendering-Technique/raw/main/output/rendering-06-voxel.pdf)
 
 ---
 
@@ -28,11 +28,6 @@
 - [第 7 章 从占据率重建表面](#/books/voxel/chapters/ch07)
 - [第 8 章 大规模场景的分块与流式](#/books/voxel/chapters/ch08)
 - [第 9 章 体素与路径追踪的接缝](#/books/voxel/chapters/ch09)
-- [附录 A　符号表](#/books/voxel/appendix/app_a)
-- [附录 B　体素方案对比](#/books/voxel/appendix/app_b)
-- [附录 C　参考文献](#/books/voxel/appendix/app_c)
-- [后记](#/books/voxel/front/afterword)
-- [backcover](#/books/voxel/front/backcover)
 
 ## 重新生成
 
