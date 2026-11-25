@@ -1,8 +1,12 @@
-<img src="books/beginner/images/cover/cover_front_plain.jpg" alt="cover" style="max-height:40vh;width:auto;max-width:92vw;border-radius:8px;box-shadow:0 18px 50px rgba(0,0,0,.35)">
+# 专业级渲染技术
 
-<h1 style="color:#ffffff;font-size:2.5rem;letter-spacing:2px;margin:18px 0 6px">专业级渲染技术</h1>
+> 一套写给渲染实现者的材质专题书
 
-<p style="color:#d7dfea;font-size:1.1rem;margin:0 0 22px">入门篇 + 八个材质专题　·　Dr. Dezeming</p>
+这套书假设你已经写过一个能跑的光线追踪器，知道射线求交、着色和蒙特卡洛积分怎么工作，也见过 BRDF 和渲染方程。它不再教怎么打第一条光线，而是集中在材质这一层最容易含糊的地方：一个材质为什么长成那个公式，公式里的每一项在物理上对应什么，换到另一种材料上哪些假设会碎掉。
 
-[开始阅读](books/beginner/README.md)
-[系列说明](SERIES.md)
+**Dr. Dezeming**　·　2026
+
+<p class="cover-links">
+<a href="#/books/beginner/README">开始阅读</a>
+<a href="#/README">书目与下载</a>
+</p>
