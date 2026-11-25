@@ -56,7 +56,7 @@ exit /b 0
 :all
 %PY% "books\code\make_figures.py"
 if errorlevel 1 goto :err
-for %%B in (beginner cloth hair sss spectral aniso-metal voxel wave-optics reservoir) do (
+for %%B in (beginner cloth hair sss spectral aniso-metal voxel wave-optics reservoir sdf physics) do (
   if exist "books\%%B\structure.json" (
     call :one %%B
     if errorlevel 1 goto :err
