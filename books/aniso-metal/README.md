@@ -2,7 +2,7 @@
 
 **专业级渲染技术 · 专题五**　·　从复折射率到拉丝高光
 
-作者：Dr. Dezeming　　在线阅读 <https://ai-crystal.github.io/Rendering-Technique/>　　下载：[整本 PDF](https://github.com/ai-crystal/Rendering-Technique/raw/main/output/rendering-05-aniso-metal.pdf)
+作者：Dr. Dezeming　　在线阅读 <https://ai-crystal.github.io/Rendering-Technique/>　　下载：[整本 PDF](https://github.com/ai-crystal/Rendering-Technique/raw/main/output/v6-aniso-metal.pdf)
 
 ---
 

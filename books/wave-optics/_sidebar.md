@@ -23,4 +23,4 @@
   - [附录 B　参考文献](#/books/wave-optics/appendix/app_b)
 
 - [后记](#/books/wave-optics/front/afterword)
-- [下载 PDF](output/rendering-07-wave-optics.pdf ':ignore')
+- [下载 PDF](output/v8-wave-optics.pdf ':ignore')

@@ -28,4 +28,4 @@
   - [附录 C　参考文献](#/books/cloth/appendix/app_c)
 
 - [后记](#/books/cloth/front/afterword)
-- [下载 PDF](output/rendering-01-cloth.pdf ':ignore')
+- [下载 PDF](output/v2-cloth.pdf ':ignore')

@@ -41,4 +41,4 @@
   - [附录 D　术语对照](#/books/sss/appendix/app_d)
 
 - [后记](#/books/sss/front/afterword)
-- [下载 PDF](output/rendering-03-sss.pdf ':ignore')
+- [下载 PDF](output/v4-sss.pdf ':ignore')

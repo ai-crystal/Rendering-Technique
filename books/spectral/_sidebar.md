@@ -40,4 +40,4 @@
   - [附录 C　参考文献](#/books/spectral/appendix/app_c)
 
 - [后记](#/books/spectral/front/afterword)
-- [下载 PDF](output/rendering-04-spectral.pdf ':ignore')
+- [下载 PDF](output/v5-spectral.pdf ':ignore')

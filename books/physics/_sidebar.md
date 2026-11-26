@@ -49,4 +49,4 @@
   - [附录 D　参考文献](#/books/physics/appendix/app_d)
 
 - [后记](#/books/physics/front/afterword)
-- [下载 PDF](output/rendering-10-physics.pdf ':ignore')
+- [下载 PDF](output/v11-physics.pdf ':ignore')

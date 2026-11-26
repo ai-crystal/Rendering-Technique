@@ -23,4 +23,4 @@
   - [附录 C　参考文献](#/books/aniso-metal/appendix/app_c)
 
 - [后记](#/books/aniso-metal/front/afterword)
-- [下载 PDF](output/rendering-05-aniso-metal.pdf ':ignore')
+- [下载 PDF](output/v6-aniso-metal.pdf ':ignore')

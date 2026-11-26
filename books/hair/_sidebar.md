@@ -24,4 +24,4 @@
   - [附录 C　参考文献](#/books/hair/appendix/app_c)
 
 - [后记](#/books/hair/front/afterword)
-- [下载 PDF](output/rendering-02-hair.pdf ':ignore')
+- [下载 PDF](output/v3-hair.pdf ':ignore')

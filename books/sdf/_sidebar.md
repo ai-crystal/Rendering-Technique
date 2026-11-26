@@ -36,4 +36,4 @@
   - [附录 C　参考文献](#/books/sdf/appendix/app_c)
 
 - [后记](#/books/sdf/front/afterword)
-- [下载 PDF](output/rendering-09-sdf.pdf ':ignore')
+- [下载 PDF](output/v10-sdf.pdf ':ignore')

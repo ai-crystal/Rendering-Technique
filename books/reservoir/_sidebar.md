@@ -29,4 +29,4 @@
   - [附录 A　符号、公式与文献](#/books/reservoir/appendix/app_a)
 
 - [后记](#/books/reservoir/front/afterword)
-- [下载 PDF](output/rendering-08-reservoir.pdf ':ignore')
+- [下载 PDF](output/v9-reservoir.pdf ':ignore')

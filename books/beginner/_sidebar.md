@@ -33,4 +33,4 @@
   - [附录 D　参考文献](#/books/beginner/appendix/app_d)
 
 - [后记](#/books/beginner/front/afterword)
-- [下载 PDF](output/rendering-00-beginner.pdf ':ignore')
+- [下载 PDF](output/v1-beginner.pdf ':ignore')
